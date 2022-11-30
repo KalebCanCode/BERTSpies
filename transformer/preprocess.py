@@ -6,7 +6,6 @@ from datasets import load_dataset, set_caching_enabled
 import numpy as np
 from PIL import Image
 import torch
-import torch.nn as nn
 from transformers import (
     # Preprocessing / Common
     AutoTokenizer, AutoFeatureExtractor,
@@ -17,6 +16,7 @@ from transformers import (
     # Misc
     logging
 )
+import matplotlib.pyplot as plt
 
 print(torch.backends.mps.is_built())
 ########
@@ -51,7 +51,16 @@ dataset = dataset.map(
     },
     batched=True
 )
+
 print(dataset)
+
+def showImage(id):
+    image = Image.open(os.path.join("dataset", "images", dataset['test'][id]['image_id']+".png"))
+    plt.imshow(image)
+    plt.show()
+    print("Question:\t", dataset['test'][id]['question'])
+    print("Answer:\t\t", dataset['test'][id]['answer'])
+
 @dataclass
 class MultimodalCollator:
     tokenizer: AutoTokenizer
@@ -68,9 +77,10 @@ class MultimodalCollator:
             return_attention_mask=True,
         )
         return {
-            "input_ids": encoded_text['input_ids'].squeeze(),
-            "token_type_ids": encoded_text['token_type_ids'].squeeze(),
-            "attention_mask": encoded_text['attention_mask'].squeeze(),
+            "text_features": encoded_text
+            #"input_ids": encoded_text['input_ids'].squeeze(),
+            #"token_type_ids": encoded_text['token_type_ids'].squeeze(),
+            #"attention_mask": encoded_text['attention_mask'].squeeze(),
         }
 
     def preprocess_images(self, images: List[str]):
@@ -79,7 +89,8 @@ class MultimodalCollator:
             return_tensors="pt",
         )
         return {
-            "pixel_values": processed_images['pixel_values'].squeeze(),
+            #"pixel_values": processed_images['pixel_values'].squeeze(),
+            "img_features": processed_images
         }
             
     def __call__(self, raw_batch_dict):
