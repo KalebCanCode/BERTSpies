@@ -13,7 +13,7 @@ from transformers import (
 import numpy as np
 
 class TransformerModel(nn.Module):
-    def __init__(self, num_labels = 582, hidden_dim = 512, pretrained_text = 'roberta-base', pretrained_image = 'microsoft/swin-tiny-patch4-window7-224'):
+    def __init__(self, num_labels = 582, hidden_dim = 512, pretrained_text = 'roberta-base', pretrained_image = 'google/vit-base-patch16-224-in21k'):
         super(TransformerModel, self).__init__()
         # initialize class variables 
         self.num_labels = num_labels 
