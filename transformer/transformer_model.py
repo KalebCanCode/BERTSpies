@@ -4,7 +4,7 @@ from transformers import (
     # Preprocessing / Common
     AutoTokenizer, AutoFeatureExtractor,
     # Text & Image Models (Now, image transformers like ViTModel, DeiTModel, BEiT can also be loaded using AutoModel)
-    AutoModel, Swinv2Model,         
+    AutoModel,         
     # Training / Evaluation
     TrainingArguments, Trainer,
     # Misc
@@ -22,7 +22,7 @@ class TransformerModel(nn.Module):
         self.loss = nn.CrossEntropyLoss()
         # initialize text and image transformers 
         self.text_encoder = AutoModel.from_pretrained(self.pretrained_text)
-        self.image_encoder = Swinv2Model.from_pretrained(self.pretrained_image)
+        self.image_encoder = AutoModel.from_pretrained(self.pretrained_image)
         # freeze weights of pretrained models 
         #for _, param in self.text_encoder.named_parameters():
         #    param.requires_grad = False
