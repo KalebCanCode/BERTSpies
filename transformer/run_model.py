@@ -15,8 +15,10 @@ def create_trainer(model, train_dataset, eval_dataset, data_collator):
         remove_unused_columns = False,
         num_train_epochs = 3,
         load_best_model_at_end = True, 
+        learning_rate = 5e-4,
+        warmup_ratio=0.01,
         fp16 = True, # allows for faster training of larger models and minibatch sizes 
-        dataloader_num_workers = 2 # speed up data transfer between cpu and gpu 
+        dataloader_num_workers = 4 # speed up data transfer between cpu and gpu 
         )
     trainer = Trainer(model = model, args = training_args, train_dataset = train_dataset, eval_dataset = eval_dataset, data_collator = data_collator, compute_metrics = compute_metrics)
     return trainer 
