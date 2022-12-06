@@ -24,10 +24,10 @@ class TransformerModel(nn.Module):
         self.text_encoder = AutoModel.from_pretrained(self.pretrained_text)
         self.image_encoder = Swinv2Model.from_pretrained(self.pretrained_image)
         # freeze weights of pretrained models 
-        for _, param in self.text_encoder.named_parameters():
-            param.requires_grad = False
-        for _, param in self.image_encoder.named_parameters():
-            param.requires_grad = False 
+        #for _, param in self.text_encoder.named_parameters():
+        #    param.requires_grad = False
+        #for _, param in self.image_encoder.named_parameters():
+        #    param.requires_grad = False 
         # fusion layer to combine output from text and image encoding outputs 
         self.fusion_input_dim = self.text_encoder.config.hidden_size + self.image_encoder.config.hidden_size # may change this later to allow pointwise multiplication 
         self.fusion_layer = nn.Sequential(

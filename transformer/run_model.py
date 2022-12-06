@@ -13,7 +13,7 @@ def create_trainer(model, train_dataset, eval_dataset, data_collator):
         logging_strategy = 'epoch',
         metric_for_best_model = 'wups',
         remove_unused_columns = False,
-        num_train_epochs = 3,
+        num_train_epochs = 1,
         load_best_model_at_end = True, 
         learning_rate = 5e-4,
         warmup_ratio=0.01,
