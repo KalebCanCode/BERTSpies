@@ -28,7 +28,7 @@ print(torch.backends.mps.is_built())
 
 set_caching_enabled(True)
 logging.set_verbosity_error() # ? 
-device = torch.device("mps")
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 ########
 dataset = load_dataset(
