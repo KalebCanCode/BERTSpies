@@ -52,8 +52,8 @@ def create_trainer(model, train_dataset, eval_dataset, data_collator):
 
 def train_model(): 
     # initialize tokenizer, feature extractor and pass into multimodal collator 
-    text_tokenizer = AutoTokenizer.from_pretrained('albert-base-v2')
-    feature_extractor = AutoFeatureExtractor.from_pretrained('microsoft/swin-tiny-patch4-window7-224')
+    text_tokenizer = AutoTokenizer.from_pretrained('roberta-base')
+    feature_extractor = AutoFeatureExtractor.from_pretrained('google/vit-base-patch16-224-in21k')
     # initialize components 
     collator = MultimodalCollator(text_tokenizer, feature_extractor)
     model = TransformerModel().to(device) # move model to gpu 
