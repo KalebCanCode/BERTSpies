@@ -28,8 +28,10 @@ print(torch.backends.mps.is_built())
 
 set_caching_enabled(True)
 logging.set_verbosity_error() # ? 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+torch.cuda.empty_cache()
+device = torch.device("cuda")
 print(device)
+print("lasjfdlksajflkasd")
 ########
 dataset = load_dataset(
     "csv", 
