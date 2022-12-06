@@ -13,8 +13,10 @@ def create_trainer(model, train_dataset, eval_dataset, data_collator):
         logging_strategy = 'epoch',
         metric_for_best_model = 'wups',
         remove_unused_columns = False,
-        num_train_epochs = 1,
+        num_train_epochs = 5,
         load_best_model_at_end = True, 
+        per_device_train_batch_size=32,
+        per_device_eval_batch_size=32,
         learning_rate = 5e-4,
         warmup_ratio=0.01,
         fp16 = True, # allows for faster training of larger models and minibatch sizes 
