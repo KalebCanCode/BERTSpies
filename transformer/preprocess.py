@@ -31,7 +31,7 @@ logging.set_verbosity_error() # ?
 torch.cuda.empty_cache()
 device = torch.device("cuda")
 print(device)
-print("lasjfdlksajflkasd")
+print("pushing11:13pm")
 ########
 dataset = load_dataset(
     "csv", 
