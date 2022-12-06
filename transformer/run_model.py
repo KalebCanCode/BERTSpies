@@ -54,3 +54,4 @@ def model_inference(model, collator):
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 
 model, collator, train_metrics, eval_metrics = train_model()
+model_inference(model, collator)
