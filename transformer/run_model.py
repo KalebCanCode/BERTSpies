@@ -2,7 +2,7 @@ from torch import nn
 from transformers import Trainer, TrainingArguments, AutoFeatureExtractor, AutoTokenizer
 from preprocess import dataset, MultimodalCollator, device, showImage, answer_space
 from transformer_model import TransformerModel
-from metrics import wups 
+from metrics import wup_measure
 
 def create_trainer(model, train_dataset, eval_dataset, data_collator, metric):
     training_args = TrainingArguments(
@@ -12,13 +12,13 @@ def create_trainer(model, train_dataset, eval_dataset, data_collator, metric):
         evaluation_strategy = 'epoch',
         logging_strategy = 'epoch',
         metric_for_best_model = 'wups',
-        removed_unused_columns = False,
-        num_train_epochs = 10,
+        remove_unused_columns = False,
+        num_train_epochs = 1,
         load_best_model_at_end = True, 
-        fp16 = True, # allows for faster training of larger models and minibatch sizes 
-        dataloader_num_workers = 2 # speed up data transfer between cpu and gpu 
+        fp16 = False, # allows for faster training of larger models and minibatch sizes 
+        #dataloader_num_workers = 2 # speed up data transfer between cpu and gpu 
         )
-    trainer = Trainer(model, training_args, train_dataset, eval_dataset, data_collator, compute_metrics = metric)
+    trainer = Trainer(model = model, args = training_args, train_dataset = train_dataset, eval_dataset = eval_dataset, data_collator = data_collator, compute_metrics = metric)
     return trainer 
     
 
@@ -29,7 +29,7 @@ def train_model():
     # initialize components 
     collator = MultimodalCollator(text_tokenizer, feature_extractor)
     model = TransformerModel().to(device) # move model to gpu 
-    trainer = create_trainer(model, dataset['train'], dataset['test'], collator, wups)
+    trainer = create_trainer(model, dataset['train'], dataset['test'], collator, wup_measure)
     # train 
     train_metrics = trainer.train() 
     # evaluate
@@ -53,3 +53,4 @@ def model_inference(model, collator):
         print("Prediction:\t", answer_space[preds[i-2000]])
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 
+model, collator, train_metrics, eval_metrics = train_model()

@@ -4,7 +4,7 @@ from transformers import (
     # Preprocessing / Common
     AutoTokenizer, AutoFeatureExtractor,
     # Text & Image Models (Now, image transformers like ViTModel, DeiTModel, BEiT can also be loaded using AutoModel)
-    AutoModelForQuestionAnswering, SwinForImageClassification,         
+    AutoModel, Swinv2Model,         
     # Training / Evaluation
     TrainingArguments, Trainer,
     # Misc
@@ -21,8 +21,8 @@ class TransformerModel(nn.Module):
         self.pretrained_image = pretrained_image 
         self.loss = nn.CrossEntropyLoss()
         # initialize text and image transformers 
-        self.text_encoder = AutoModelForQuestionAnswering.from_pretrained(self.pretrained_text)
-        self.image_encoder = SwinForImageClassification.from_pretrained(self.pretrained_image)
+        self.text_encoder = AutoModel.from_pretrained(self.pretrained_text)
+        self.image_encoder = Swinv2Model.from_pretrained(self.pretrained_image)
         # freeze weights of pretrained models 
         for _, param in self.text_encoder.named_parameters():
             param.requires_grad = False
@@ -42,13 +42,13 @@ class TransformerModel(nn.Module):
         # forward pass 
         text_encoding = self.text_encoder(**text_features, return_dict = True)
         image_encoding = self.image_encoder(**img_features, return_dict = True )
-        fusion_input = torch.cat([text_encoding['pooler_output'], image_encoding['pooler_output']]) # pooler output is the CLS token 
+        fusion_input = torch.cat([text_encoding['pooler_output'], image_encoding['pooler_output']], dim = 1) # pooler output is the CLS token 
         fusion_output = self.fusion_layer(fusion_input)
         logits = self.classifier(fusion_output)
         # calculate loss 
         loss = self.loss(logits, labels)
 
-        return logits, loss 
+        return {"logits": logits, "loss": loss}
     
     
 
