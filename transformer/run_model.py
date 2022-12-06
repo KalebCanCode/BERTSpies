@@ -5,24 +5,48 @@ from transformer_model import TransformerModel
 from metrics import compute_metrics
 
 def create_trainer(model, train_dataset, eval_dataset, data_collator):
-    training_args = TrainingArguments(
-        output_dir = '/Users/jean/Documents/CS1470/dl-final-project/transformer/transformer-checkpoints',
-        seed = 1470,
-        save_strategy = 'epoch',
-        evaluation_strategy = 'epoch',
-        logging_strategy = 'epoch',
-        metric_for_best_model = 'wups',
-        remove_unused_columns = False,
-        num_train_epochs = 5,
-        load_best_model_at_end = True, 
-        per_device_train_batch_size=32,
-        per_device_eval_batch_size=32,
-        learning_rate = 5e-4,
-        warmup_ratio=0.01,
-        fp16 = True, # allows for faster training of larger models and minibatch sizes 
-        dataloader_num_workers = 4 # speed up data transfer between cpu and gpu 
-        )
-    trainer = Trainer(model = model, args = training_args, train_dataset = train_dataset, eval_dataset = eval_dataset, data_collator = data_collator, compute_metrics = compute_metrics)
+    args = TrainingArguments(
+    output_dir = '/Users/jean/Documents/CS1470/dl-final-project/transformer/transformer-checkpoints',
+    seed=12345, 
+    evaluation_strategy="steps",
+    eval_steps=100,
+    logging_strategy="steps",
+    logging_steps=100,
+    save_strategy="steps",
+    save_steps=100,
+    save_total_limit=3,             # Save only the last 3 checkpoints at any given time while training 
+    metric_for_best_model='wups',
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
+    remove_unused_columns=False,
+    num_train_epochs=12,
+    fp16=True,
+    # warmup_ratio=0.01,
+    # learning_rate=5e-4,
+    # weight_decay=1e-4,
+    # gradient_accumulation_steps=2,
+    dataloader_num_workers=8,
+    load_best_model_at_end=True,
+)
+
+    # training_args = TrainingArguments(
+        
+    #     seed = 1470,
+    #     save_strategy = 'epoch',
+    #     evaluation_strategy = 'epoch',
+    #     logging_strategy = 'epoch',
+    #     metric_for_best_model = 'wups',
+    #     remove_unused_columns = False,
+    #     num_train_epochs = 5,
+    #     load_best_model_at_end = True, 
+    #     per_device_train_batch_size=32,
+    #     per_device_eval_batch_size=32,
+    #     learning_rate = 5e-4,
+    #     warmup_ratio=0.01,
+    #     fp16 = True, # allows for faster training of larger models and minibatch sizes 
+    #     dataloader_num_workers = 4 # speed up data transfer between cpu and gpu 
+    #     )
+    trainer = Trainer(model = model, args = args, train_dataset = train_dataset, eval_dataset = eval_dataset, data_collator = data_collator, compute_metrics = compute_metrics)
     return trainer 
     
 
