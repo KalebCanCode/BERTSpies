@@ -13,7 +13,7 @@ def create_trainer(model, train_dataset, eval_dataset, data_collator):
         logging_strategy = 'epoch',
         metric_for_best_model = 'wups',
         remove_unused_columns = False,
-        num_train_epochs = 1,
+        num_train_epochs = 3,
         load_best_model_at_end = True, 
         fp16 = True, # allows for faster training of larger models and minibatch sizes 
         dataloader_num_workers = 2 # speed up data transfer between cpu and gpu 
