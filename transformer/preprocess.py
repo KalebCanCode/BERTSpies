@@ -55,7 +55,7 @@ dataset = dataset.map(
 )
 
 print(dataset)
-training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True)
+training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=False)
 for batch_ndx, sample in enumerate(training_loader):
     print(sample)
 
