@@ -55,6 +55,9 @@ dataset = dataset.map(
 )
 
 print(dataset)
+training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True)
+for batch_ndx, sample in enumerate(training_loader):
+    print(sample)
 
 def showImage(id):
     image = Image.open(os.path.join("dataset", "images", dataset['test'][id]['image_id']+".png"))

@@ -2,7 +2,7 @@ from two_channel_nn import TwoChanNN
 import argparse
 import torch
 import time
-from preprocess import dataset
+from preprocess import process_words, dataset
 from torchvision import models
 from torchsummary import summary
 
@@ -36,7 +36,7 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def train(model, optimizer, loss_fn, train_dl, val_dl, epochs, device):
+def train(model, optimizer, loss_fn, train_l, train_d, val_l, val_d, epochs, device):
 
     print('train() called: model=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(model).__name__, type(optimizer).__name__,
@@ -126,11 +126,12 @@ def main(args):
     loss = torch.nn.CrossEntropyLoss
 
     # maybe need this?
-    # training_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
-    # validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=4, shuffle=False, num_workers=2)
+    training_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
+    validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=4, shuffle=False, num_workers=2)
 
     if args.task == 'train':
-        history = train(model, optimizer, loss, dataset['train'], dataset['test'], args.device)
+        word2idx, vocab_size, train_q, test_q  = process_words()
+        history = train(model, optimizer, loss,, , args.device)
         print(history)
     
     if args.task == 'inference':
