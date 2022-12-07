@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import os 
 from datasets import load_dataset
+from PIL import Image
 
 full_dataset = load_dataset(
     "csv", 
@@ -88,6 +89,13 @@ def process_words(vocab, data):
     #print(questions)
     return torch.tensor(questions)#, torch.tensor(test_questions)
 
+
+
+def convert_img(img_id):
+    image = Image.open(os.path.join("dataset", "images", img_id+".png"))
+    image_numpy = np.array(image.resize((224, 224)))
+    return torch.tensor(image_numpy)
+
 word2idx, vocab_size= build_vocab()
 
 dataset = load_dataset(
@@ -97,6 +105,7 @@ dataset = load_dataset(
         "test": os.path.join("dataset", "data_eval.csv")
     }
 )
+
 with open(os.path.join("dataset", "answer_space.txt")) as f:
     answer_space = f.read().splitlines()
 
@@ -119,8 +128,19 @@ dataset = dataset.map(
     },
     batched=True
 )
-print(dataset['train']['answer'][0])
-print(dataset['train']['q_tensor'][0])
+
+dataset = dataset.map(
+    lambda examples: {
+        'i_tensor': [
+            convert_img(id)
+            for id in examples['image_id']
+        ]
+    },
+    batched=True
+)
+
+#print(dataset['train']['answer'][0])
+#print(dataset['train']['q_tensor'][0])
 #dataset['train']['q_tensor'] = torch.cat(dataset['train']['q_tensor'], axis = 0)
 def collate_fn(list_items):
     #print("list", list_items)
@@ -129,10 +149,13 @@ def collate_fn(list_items):
     q = []
     for d in list_items: 
         label.append(d['label'])
-        img.append(d['image_id'])
+        img.append(torch.tensor(d['i_tensor']))
         q.append(torch.tensor(d['q_tensor']))
     return {'q_tensor': q, 'image_id': img, 'label': label}
+print(dataset['train']['i_tensor'])
 
-training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=False, collate_fn = collate_fn)
-for batch_ndx, sample in enumerate(training_loader):
-    print(sample)
+training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, collate_fn = collate_fn)
+val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=True, collate_fn = collate_fn)
+#for batch_ndx, sample in enumerate(training_loader):
+#        print(sample['image_id'])
+#        break

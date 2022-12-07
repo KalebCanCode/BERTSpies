@@ -2,7 +2,7 @@ from two_channel_nn import TwoChanNN
 import argparse
 import torch
 import time
-from preprocess import process_words, dataset
+from preprocess import training_loader, val_loader, word2idx
 from torchvision import models
 from torchsummary import summary
 
@@ -59,33 +59,24 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         num_train_examples = 0
         # get vocab first 
 
-        for batch in train_loader: # this is a list of dictionaries mapping answer, image_id, . etc -> data 
-
+        for batch in train_loader: 
             optimizer.zero_grad()
-            
-            # do preprocessing here
-            # process_words with the vocab and the dictionary. this gives the
-            # question as a tensor
-            # also keep track of labels in a label tensor list 
 
-            # stack q tensors to get a batch of question tensors
-            # stack label tensors to get a batch of label tensors 
-            # 
-
-            x    = batch[0].to(device)
-            y    = batch[1].to(device)
-            yhat = model(x)
-            loss = loss_fn(yhat, y)
+            q_feats    = torch.cat(batch['q_tensor'], axis = 0).to(device)
+            img_feats    = torch.cat(batch['i_tensor'], axis = 0).to(device)
+            labels = torch.tensor(batch['label']).to(device)
+            yhat = model((img_feats, q_feats))
+            loss = loss_fn(yhat, labels)
 
             loss.backward()
             optimizer.step()
 
-            train_loss         += loss.data.item() * x.size(0)
-            num_train_correct  += (torch.max(yhat, 1)[1] == y).sum().item()
-            num_train_examples += x.shape[0]
+            train_loss         += loss.data.item() * q_feats.size(0)
+            num_train_correct  += (torch.max(yhat, 1)[1] == labels).sum().item()
+            num_train_examples += 4
 
         train_acc   = num_train_correct / num_train_examples
-        train_loss  = train_loss / len(train_dl.dataset)
+        train_loss  = train_loss / num_train_examples
 
 
         # --- EVALUATE ON VALIDATION SET -------------------------------------
@@ -94,19 +85,20 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         num_val_correct  = 0
         num_val_examples = 0
 
-        for batch in val_dl:
+        for batch in val_loader:
 
-            x    = batch[0].to(device)
-            y    = batch[1].to(device)
-            yhat = model(x)
-            loss = loss_fn(yhat, y)
+            q_feats    = torch.cat(batch['q_tensor'], axis = 0).to(device)
+            img_feats    = torch.cat(batch['i_tensor'], axis = 0).to(device)
+            labels = torch.tensor(batch['label']).to(device)
+            yhat = model((img_feats, q_feats))
+            loss = loss_fn(yhat, labels)
 
-            val_loss         += loss.data.item() * x.size(0)
-            num_val_correct  += (torch.max(yhat, 1)[1] == y).sum().item()
-            num_val_examples += y.shape[0]
+            val_loss         += loss.data.item() * q_feats.size(0)
+            num_val_correct  += (torch.max(yhat, 1)[1] == labels).sum().item()
+            num_val_examples += 4
 
         val_acc  = num_val_correct / num_val_examples
-        val_loss = val_loss / len(val_dl.dataset)
+        val_loss = val_loss / num_val_examples
 
 
         if epoch % 1 ==0:
@@ -131,17 +123,17 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
     return history
 
 def main(args):
-    model = TwoChanNN(args.extractor, args.lstm_units, args.feat_size, 'vocab_size')
-    optimizer = torch.optim.Adam
-    loss = torch.nn.CrossEntropyLoss
+    model = TwoChanNN(args.extractor, args.lstm_units, args.feat_size, len(word2idx))
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.001, momentum=0.9)
+    loss = torch.nn.CrossEntropyLoss()
 
     # maybe need this?
-    training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, num_workers=2)
-    validation_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, num_workers=2)
+    #training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, num_workers=2)
+    #validation_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, num_workers=2)
 
     if args.task == 'train':
-        word2idx, vocab_size, train_q, test_q  = process_words()
-        history = train(model, training_loader, validation_loader, args.device)
+        #word2idx, vocab_size, train_q, test_q  = process_words()
+        history = train(model, training_loader, val_loader, args.device)
         print(history)
     
     if args.task == 'inference':
