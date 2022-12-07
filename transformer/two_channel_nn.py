@@ -35,7 +35,7 @@ class TwoChanNN(nn.Module):
 
 
     )
-    self.embedding = nn.Embedding(vocab_size, 512)
+    self.embedding = nn.Embedding(self.vocab_size, 512)
 #Motivating example  
 # >>> rnn = nn.LSTM(10, 20, 2)
 # >>> input = torch.randn(5, 3, 10)

@@ -3,6 +3,8 @@ import argparse
 import torch
 import time
 from preprocess import dataset
+from torchvision import models
+from torchsummary import summary
 
 
 def parse_args(args=None):
@@ -16,11 +18,12 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(description="Let's Do this Two Channel Thing :D", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--extractor',           required=True,         help='Feature Extractor such as VGG16')
     parser.add_argument('--task',           required=True,              choices=['train', 'inference'],  help='Task to run')
-    parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
+    parser.add_argument('--feat_size', required=True,     type=int,                   help='Feature size  of extractor')
+    parser.add_argument('--device',  required=True,    type=str,                   help='Device Using')
+    # parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
     parser.add_argument('--epochs',         type=int,   default=10,      help='Number of epochs')
     parser.add_argument('--lstm_units',     type=int, default=512,      help='Hidden Size of lstm')
-    parser.add_argument('--feat_size',     type=int,                   help='Feature size  of extractor')
-    parser.add_argument('--device',     type=str,                   help='Device Using')
+    
     
     # parser.add_argument('--optimizer',      type=str,   default='adam', choices=['adam', 'rmsprop', 'sgd'], help='Model\'s optimizer')
     # parser.add_argument('--batch_size',     type=int,   default=100,    help='Model\'s batch size.')
