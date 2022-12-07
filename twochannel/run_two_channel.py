@@ -36,8 +36,8 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def train(model, optimizer, loss_fn, train_l, train_d, val_l, val_d, epochs, device):
-
+def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
+    summary(model)
     print('train() called: model=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(model).__name__, type(optimizer).__name__,
            optimizer.param_groups[0]['lr'], epochs, device))
@@ -57,10 +57,20 @@ def train(model, optimizer, loss_fn, train_l, train_d, val_l, val_d, epochs, dev
         train_loss         = 0.0
         num_train_correct  = 0
         num_train_examples = 0
+        # get vocab first 
 
-        for batch in train_dl:
+        for batch in train_loader: # this is a list of dictionaries mapping answer, image_id, . etc -> data 
 
             optimizer.zero_grad()
+            
+            # do preprocessing here
+            # process_words with the vocab and the dictionary. this gives the
+            # question as a tensor
+            # also keep track of labels in a label tensor list 
+
+            # stack q tensors to get a batch of question tensors
+            # stack label tensors to get a batch of label tensors 
+            # 
 
             x    = batch[0].to(device)
             y    = batch[1].to(device)
@@ -126,12 +136,12 @@ def main(args):
     loss = torch.nn.CrossEntropyLoss
 
     # maybe need this?
-    training_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
-    validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=4, shuffle=False, num_workers=2)
+    training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, num_workers=2)
+    validation_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, num_workers=2)
 
     if args.task == 'train':
         word2idx, vocab_size, train_q, test_q  = process_words()
-        history = train(model, optimizer, loss,, , args.device)
+        history = train(model, training_loader, validation_loader, args.device)
         print(history)
     
     if args.task == 'inference':
