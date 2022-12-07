@@ -1,11 +1,15 @@
-import pickle
-import random
-import re
+
 import torch
 import numpy as np
-import collections
-from preprocess import dataset, answer_space
+from datasets import load_dataset
 
+dataset = load_dataset(
+    "csv", 
+    data_files={
+        "train": os.path.join("dataset","data_train.csv"),
+        "test": os.path.join("dataset", "data_eval.csv")
+    }
+)
 def get_words(sentences):
     to_return = []
     for sentence in sentences:
