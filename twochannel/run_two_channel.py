@@ -64,8 +64,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             #print(batch)
             optimizer.zero_grad()
             #print(batch['q_tensor'][0].size(), batch['image_id'][0].size(), batch['label'])
-            q_feats    = torch.stack(batch['q_tensor'], axis = 0)#.to(device)
-            img_feats    = torch.stack(batch['image_id'], axis = 0)#.to(device)
+            q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
+            img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
             #print(q_feats.size(), img_feats.size(), labels.size())
             yhat = model((img_feats, q_feats))
@@ -97,8 +97,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
         for batch in val_loader:
 
-            q_feats    = torch.stack(batch['q_tensor'], axis = 0)#.to(device)
-            img_feats    = torch.stack(batch['image_tensor'], axis = 0)#.to(device)
+            q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
+            img_feats    = torch.stack(batch['image_tensor'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
             yhat = model((img_feats, q_feats))
             loss = loss_fn(yhat, labels)
@@ -152,7 +152,9 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 import torchvision.models as models
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_ft = models.vgg16(pretrained=True)    
+model_ft.to('cuda')
 model = TwoChanNN(model_ft, 512, 4096, len(word2idx))
+model.to('cuda')
 print('asdfkljaskf')
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()

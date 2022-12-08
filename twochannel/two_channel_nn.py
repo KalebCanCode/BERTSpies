@@ -10,6 +10,7 @@ class TwoChanNN(nn.Module):
     super().__init__()
     self.vocab_size = vocab_size
     self.pretrained_extractor = image_feature_extractor
+    self.pretrained_extractor
     self.hidden_units = lstm_units 
     #nn.LSTM(input_size, hidden_size, num_layers)
     self.lstm_a = nn.LSTM(512, 512, 1, batch_first=True)
