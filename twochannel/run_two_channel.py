@@ -98,7 +98,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         for batch in val_loader:
 
             q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
-            img_feats    = torch.stack(batch['image_tensor'], axis = 0).to(device)
+            img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
             yhat = model((img_feats, q_feats))
             loss = loss_fn(yhat, labels)
