@@ -43,7 +43,7 @@ def build_vocab():
     train_questions, train_answers = get_words(full_dataset['train']['question']), get_words(full_dataset['train']['answer'])
     test_questions, test_answers = get_words(full_dataset['test']['question']), get_words(full_dataset['test']['answer'])
     # pad all of them (not the answers)
-    train_questions, test_questions = pad_sentences(train_questions, 25), pad_sentences(test_questions, 25)
+    train_questions, test_questions = pad_sentences(train_questions, 28), pad_sentences(test_questions, 28)
 
     for caption in train_questions:
         for index, word in enumerate(caption):
@@ -79,7 +79,7 @@ def process_words(vocab, data):
     ##print('words', questions)
     #test_questions = get_words(test['question'])
     # pad both
-    questions = pad_sentence(questions, 25)
+    questions = pad_sentence(questions, 28)
 
     for index, word in enumerate(questions):
         questions[index] = vocab[word] # this converts the word string to the index mapping 
