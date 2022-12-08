@@ -7,16 +7,17 @@ from torch.nn.modules.activation import Softmax
 
 class TwoChanNN(nn.Module):
   def __init__(self,image_feature_extractor, lstm_units, num_vgg_features, vocab_size):
+    super().__init__()
     self.vocab_size = vocab_size
     self.pretrained_extractor = image_feature_extractor
     self.hidden_units = lstm_units 
     #nn.LSTM(input_size, hidden_size, num_layers)
-    self.lstm_a = nn.LSTM(512, 512, 1)
-    self.lstm_b = nn.LSTM(512, 512, 1)
+    self.lstm_a = nn.LSTM(512, 512, 1, batch_first=True)
+    self.lstm_b = nn.LSTM(512, 512, 1, batch_first=True)
     #nn.Linear(input_size, output_size)
     self.image_dense = nn.Sequential(
         #pretrained outputs num_ftrs = model_ft.fc.in_features vector
-        nn.Linear(num_vgg_features, 1024),
+        nn.Linear(1000, 1024),# CHANGED THIS num_vgg_features, 1024)
         nn.Tanh()
     )
     self.question_dense = nn.Sequential(
@@ -44,10 +45,12 @@ class TwoChanNN(nn.Module):
 # >>> output, (hn, cn) = rnn(input, (h0, c0))
   def language_channel(self,questions):
     embeddings = self.embedding(questions)
-    output_a, (final_hidden_a, final_cell_a) = self.lstm_a(embeddings)
-    output_b, (final_hidden_b, final_cell_b) = self.lstm_b(final_hidden_a, (final_hidden_a, final_cell_a))
+    #print("embedding", embeddings.size()) #(4, 25, 512)
+    output_a, (final_hidden_a, final_cell_a) = self.lstm_a(embeddings) #(4, 2, 512), (1, 4, 512), (1, 4, 512)
+    #print("outputa", output_a.size(), final_hidden_a.size(), final_cell_a.size())
+    output_b, (final_hidden_b, final_cell_b) = self.lstm_b(output_a, (final_hidden_a, final_cell_a))
     #not sure about the dim here
-    return torch.cat((final_hidden_a, final_cell_a, final_hidden_b, final_cell_b), dim=2)
+    return torch.cat((final_hidden_a[0], final_cell_a[0], final_hidden_b[0], final_cell_b[0]), dim=1)
   
   def fuse(self, image_channel_features, question_features):
     im_feat = self.image_dense(image_channel_features)
@@ -56,12 +59,16 @@ class TwoChanNN(nn.Module):
     return torch.mul(im_feat, q_feat)
   
 
-  def call(self, data):
+  def forward(self, data):
     image, question = data
     phi = self.pretrained_extractor(image)
     psi = self.language_channel(question)
+    #print(phi.size())
+    #print(psi.size())
     f = self.fuse(phi, psi)
+   # print(f.size())
 
     output = self.classifier(f)
+    #print("output", output.size())
     return output
 

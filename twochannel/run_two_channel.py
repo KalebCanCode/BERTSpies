@@ -6,7 +6,6 @@ from preprocess import training_loader, val_loader, word2idx
 from torchvision import models
 from torchsummary import summary
 
-
 def parse_args(args=None):
     """ 
     Perform command-line argument parsing (other otherwise parse arguments with defaults). 
@@ -37,7 +36,7 @@ def parse_args(args=None):
 
 
 def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
-    summary(model)
+    #summary(model)
     print('train() called: model=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(model).__name__, type(optimizer).__name__,
            optimizer.param_groups[0]['lr'], epochs, device))
@@ -58,13 +57,17 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         num_train_correct  = 0
         num_train_examples = 0
         # get vocab first 
-
+        counter = 0
+        print(len(train_loader))
         for batch in train_loader: 
+            #print(batch)
+            #print(batch)
             optimizer.zero_grad()
-
-            q_feats    = torch.cat(batch['q_tensor'], axis = 0).to(device)
-            img_feats    = torch.cat(batch['i_tensor'], axis = 0).to(device)
+            #print(batch['q_tensor'][0].size(), batch['image_id'][0].size(), batch['label'])
+            q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
+            img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
+            #print(q_feats.size(), img_feats.size(), labels.size())
             yhat = model((img_feats, q_feats))
             loss = loss_fn(yhat, labels)
 
@@ -72,9 +75,15 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             optimizer.step()
 
             train_loss         += loss.data.item() * q_feats.size(0)
+            #print(torch.max(yhat, 1)[1])
+            #print(labels)
             num_train_correct  += (torch.max(yhat, 1)[1] == labels).sum().item()
             num_train_examples += 4
-
+            #print(num_train_correct)
+            counter += 1
+            print(counter)
+        print("done")
+        print(num_train_correct)
         train_acc   = num_train_correct / num_train_examples
         train_loss  = train_loss / num_train_examples
 
@@ -84,11 +93,12 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         val_loss       = 0.0
         num_val_correct  = 0
         num_val_examples = 0
+        print("evaluating")
 
         for batch in val_loader:
 
-            q_feats    = torch.cat(batch['q_tensor'], axis = 0).to(device)
-            img_feats    = torch.cat(batch['i_tensor'], axis = 0).to(device)
+            q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
+            img_feats    = torch.stack(batch['image_tensor'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
             yhat = model((img_feats, q_feats))
             loss = loss_fn(yhat, labels)
@@ -122,27 +132,30 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
     return history
 
-def main(args):
-    model = TwoChanNN(args.extractor, args.lstm_units, args.feat_size, len(word2idx))
-    optimizer = torch.optim.Adam(model.parameters(), lr = 0.001, momentum=0.9)
-    loss = torch.nn.CrossEntropyLoss()
+# def main(args):
+#     model = TwoChanNN(args.extractor, args.lstm_units, args.feat_size, len(word2idx))
+#     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+#     loss = torch.nn.CrossEntropyLoss()
 
-    # maybe need this?
-    #training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, num_workers=2)
-    #validation_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, num_workers=2)
+#     # maybe need this?
+#     #training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, num_workers=2)
+#     #validation_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, num_workers=2)
 
-    if args.task == 'train':
-        #word2idx, vocab_size, train_q, test_q  = process_words()
-        history = train(model, training_loader, val_loader, args.device)
-        print(history)
+#     if args.task == 'train':
+#         print('train')
+#         #word2idx, vocab_size, train_q, test_q  = process_words()
+#         history = train(model, training_loader, val_loader, args.device)
+#         print(history)
     
-    if args.task == 'inference':
-        return None
-        
+#     if args.task == 'inference':
+#         return None
+import torchvision.models as models
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model_ft = models.vgg16(pretrained=True)    
+model = TwoChanNN(model_ft, 512, 4096, len(word2idx))
+print('asdfkljaskf')
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+loss = torch.nn.CrossEntropyLoss()
+history = train(model, optimizer, loss, training_loader, val_loader, 1, 'cuda')
 
-
-
-
-
-    
 

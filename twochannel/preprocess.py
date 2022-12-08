@@ -92,9 +92,11 @@ def process_words(vocab, data):
 
 
 def convert_img(img_id):
-    image = Image.open(os.path.join("dataset", "images", img_id+".png"))
-    image_numpy = np.array(image.resize((224, 224)))
-    return torch.tensor(image_numpy)
+    #image = Image.open(os.path.join("dataset", "images", img_id+".png"))
+    #image_numpy = np.array(image.resize((224, 224)))
+    out = torch.ones((32, 32, 3))
+    out = torch.transpose(out, 0, 2)
+    return torch.transpose(out, 2, 1)
 
 word2idx, vocab_size= build_vocab()
 
@@ -152,7 +154,7 @@ def collate_fn(list_items):
         img.append(torch.tensor(d['i_tensor']))
         q.append(torch.tensor(d['q_tensor']))
     return {'q_tensor': q, 'image_id': img, 'label': label}
-print(dataset['train']['i_tensor'])
+#print(dataset['train']['i_tensor'])
 
 training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, collate_fn = collate_fn)
 val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=True, collate_fn = collate_fn)
