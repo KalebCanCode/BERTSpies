@@ -36,8 +36,9 @@ def parse_args(args=None):
 
 
 def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
+    print("hi")
     for batch in val_loader:
-
+        print(batch['q_tensor'][0].size(), batch['q_tensor'][1].size(), batch['q_tensor'][2].size(), batch['q_tensor'][3].size())
         q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
         img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
         labels = torch.tensor(batch['label']).to(device)
