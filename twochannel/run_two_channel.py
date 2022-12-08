@@ -36,6 +36,11 @@ def parse_args(args=None):
 
 
 def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
+    for batch in val_loader:
+
+        q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
+        img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
+        labels = torch.tensor(batch['label']).to(device)
     #summary(model)
     print('train() called: model=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(model).__name__, type(optimizer).__name__,
