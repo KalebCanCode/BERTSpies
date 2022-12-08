@@ -28,11 +28,11 @@ def get_sent(sentence):
 
 def pad_sentences(sentences, max_length):
     for sentence in sentences:
-        sentence += (max_length + 1 - len(sentence)) * ['<pad>']
+        sentence += (max_length - len(sentence)) * ['<pad>']
     return sentences
 
 def pad_sentence(sentence, max_length):
-    sentence += (max_length + 1 - len(sentence)) * ['<pad>']
+    sentence += (max_length - len(sentence)) * ['<pad>']
     ##print(sentence)
     return sentence
 
@@ -43,7 +43,7 @@ def build_vocab():
     train_questions, train_answers = get_words(full_dataset['train']['question']), get_words(full_dataset['train']['answer'])
     test_questions, test_answers = get_words(full_dataset['test']['question']), get_words(full_dataset['test']['answer'])
     # pad all of them (not the answers)
-    train_questions, test_questions = pad_sentences(train_questions, 28), pad_sentences(test_questions, 28)
+    train_questions, test_questions = pad_sentences(train_questions, 27), pad_sentences(test_questions, 27)
 
     for caption in train_questions:
         for index, word in enumerate(caption):
@@ -79,7 +79,7 @@ def process_words(vocab, data):
     ##print('words', questions)
     #test_questions = get_words(test['question'])
     # pad both
-    questions = pad_sentence(questions, 28)
+    questions = pad_sentence(questions, 27)
 
     for index, word in enumerate(questions):
         questions[index] = vocab[word] # this converts the word string to the index mapping 
@@ -154,10 +154,9 @@ def collate_fn(list_items):
         img.append(torch.tensor(d['i_tensor']))
         q.append(torch.tensor(d['q_tensor']))
     return {'q_tensor': q, 'image_id': img, 'label': label}
-#print(dataset['train']['i_tensor'])
+print(len(dataset['test']['q_tensor'][0]), len(dataset['test']['q_tensor'][1]), len(dataset['test']['q_tensor'][2]))
 
 training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, collate_fn = collate_fn)
-val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=True, collate_fn = collate_fn)
-#for batch_ndx, sample in enumerate(training_loader):
-#        print(sample['image_id'])
-#        break
+val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, collate_fn = collate_fn)
+for batch_ndx, sample in enumerate(val_loader):
+        print(len(sample['q_tensor'][0]), len(sample['q_tensor'][1]), len(sample['q_tensor'][2]), len(sample['q_tensor'][3]))
