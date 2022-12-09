@@ -182,7 +182,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 #         return None
 import torchvision.models as models
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model_ft = models.resnet50(pretrained=True)   
+model_ft = models.vgg19(pretrained=True)   
 for param in model_ft.parameters():
     param.requires_grad = False 
 model_ft.to('cuda')
