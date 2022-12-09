@@ -73,7 +73,7 @@ class TwoChanNN(nn.Module):
     _, (h,c) = self.lstm_d(embeddings)
 
     z = torch.cat((h,c), dim=2)
-    z = z.reshape(z.size()[0], 2048 )
+    # z = z.reshape(z.size()[0], 2048 )
 
     z = self.tanh(z)
     z = self.lstm_fc(z)
