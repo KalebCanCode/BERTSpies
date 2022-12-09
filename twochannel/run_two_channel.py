@@ -95,6 +95,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             label_list = batch['label']
             wups = in_batch_wup_measure(label_list, yhat_list)
             avg_wups.append(wups)
+            break
 
         print("done")
         print(num_train_correct)
@@ -132,22 +133,31 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             label_list = batch['label']
             vwups = in_batch_wup_measure(label_list, yhat_list)
             val_wups.append(vwups)
+            break
 
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
         val_wups = np.mean(val_wups)
 
+        print(train_loss, 'trainl')
+        print(train_acc, 'traina')
+        print(avg_wups, 'avwup')
+        print(val_wups, 'valwp')
+        print(val_loss, 'vallllos')
+        print(val_acc, 'vallacc')
+
+
 
         if epoch % 1 ==0:
           print('Epoch %3d/%3d, train loss: %5.2f, train acc: %5.2f, train wups:%5.2f, val wups:%5.2f, val loss: %5.2f, val acc: %5.2f' % \
-                (epoch, epochs, train_loss, train_acc, val_loss, val_acc, avg_wups, val_wups))
+                (epoch, epochs, train_loss, train_acc, avg_wups, val_wups, val_loss, val_acc))
 
         history['loss'].append(train_loss)
         history['val_loss'].append(val_loss)
         history['acc'].append(train_acc)
         history['val_acc'].append(val_acc)
         history['wups'].append(avg_wups)
-        history['wups'].append(val_wups)
+        history['val_wups'].append(val_wups)
 
     # END OF TRAINING LOOP
 
