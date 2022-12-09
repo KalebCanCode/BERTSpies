@@ -66,14 +66,14 @@ class TwoChanNN(nn.Module):
   def forward(self, data):
     image, question = data
     phi = self.pretrained_extractor(image)
-    question = self.embedding(question)
-    psi, (h, c) = self.lstm_c(question)
-    #print(phi.size())
-    #print(psi.size())
-    f = self.fuse(phi, h[-1])
+    # question = self.embedding(question)
+    # psi, (h, c) = self.lstm_c(question)
+    # #print(phi.size())
+    # #print(psi.size())
+    # f = self.fuse(phi, h[-1])
    # print(f.size())
 
-    output = self.classifier(f)
+    output = self.classifier(phi)
     #print("output", output.size())
     return output
 
