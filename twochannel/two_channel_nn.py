@@ -31,13 +31,14 @@ class TwoChanNN(nn.Module):
     )
     self.classifier = nn.Sequential(
         nn.Linear(1024, 1000),
-        nn.Tanh(),
-        nn.Dropout(0.5),
+        nn.ReLU(),
+        nn.Dropout(0.4),
         #1000 or 500 because of dropout??
-        nn.Linear(1000, 582),
-        # do we need this tanh then softmax??
-        nn.Tanh(),
 
+        nn.Linear(1000, 700),
+        nn.ReLU(),
+        nn.Dropout(0.4),
+        nn.Linear(700, 582),
 
     )
     self.embedding = nn.Embedding(self.vocab_size, 512)

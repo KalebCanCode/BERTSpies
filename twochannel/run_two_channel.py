@@ -81,11 +81,11 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             loss.backward()
             optimizer.step()
 
-            train_loss         += loss.item() * q_feats.size(0)
+            train_loss         += loss.item() 
             #print(torch.max(yhat, 1)[1])
             #print(labels)
             num_train_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
-            num_train_examples += 4
+            num_train_examples += 32
             #print(num_train_correct)
             
 
@@ -123,7 +123,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
             val_loss         += loss.data.item() * q_feats.size(0)
             num_val_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
-            num_val_examples += 4
+            num_val_examples += 32
 
             yhat_list = torch.argmax(yhat,1).tolist()
             label_list = batch['label']
@@ -179,7 +179,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 #         return None
 import torchvision.models as models
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model_ft = models.swin_s(pretrained=True)   
+model_ft = models.resnet50(pretrained=True)   
 for param in model_ft.parameters():
     param.requires_grad = False 
 model_ft.to('cuda')
