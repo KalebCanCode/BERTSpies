@@ -139,7 +139,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
 
         if epoch % 1 ==0:
-          print('Epoch %3d/%3d, train loss: %5.2f, train acc: %5.2f, train wups:%5.2f, val wups:%5.2f val loss: %5.2f, val acc: %5.2f' % \
+          print('Epoch %3d/%3d, train loss: %5.2f, train acc: %5.2f, train wups:%5.2f, val wups:%5.2f, val loss: %5.2f, val acc: %5.2f' % \
                 (epoch, epochs, train_loss, train_acc, val_loss, val_acc, avg_wups, val_wups))
 
         history['loss'].append(train_loss)
