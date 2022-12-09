@@ -30,7 +30,7 @@ class TwoChanNN(nn.Module):
         nn.Linear(1000, 1024),# CHANGED THIS num_vgg_features, 1024)
         nn.Tanh()
     )
-    self.image_fc = nn.Linear(in_features, 1024)
+    self.image_fc = nn.Linear(4096, 1024)
     self.question_dense = nn.Sequential(
         nn.Linear(2048, 1024),
         nn.Tanh()
