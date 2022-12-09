@@ -17,7 +17,7 @@ class TwoChanNN(nn.Module):
               
     self.lstm_b = nn.LSTM(512, 512, 1, batch_first=True)
 
-    self.lstm_c = nn.LSTM(512, 512, 5, batch_first=True)
+    self.lstm_c = nn.LSTM(2048, 1024, 3, batch_first=True)
      
     #nn.Linear(input_size, output_size)
     self.image_dense = nn.Sequential(
@@ -26,7 +26,7 @@ class TwoChanNN(nn.Module):
         nn.Tanh()
     )
     self.question_dense = nn.Sequential(
-        nn.Linear(512, 1024),
+        nn.Linear(2048, 1024),
         nn.Tanh()
     )
     self.classifier = nn.Sequential(
@@ -66,8 +66,8 @@ class TwoChanNN(nn.Module):
   def forward(self, data):
     image, question = data
     phi = self.pretrained_extractor(image)
-    question = self.embedding(question)
-    psi, (h, c) = self.lstm_c(question)
+    psi = self.language_channel(question)
+    psi = self.lstm_c(psi)
     #print(phi.size())
     #print(psi.size())
     f = self.fuse(phi, psi)
