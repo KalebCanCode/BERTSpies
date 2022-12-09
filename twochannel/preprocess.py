@@ -92,7 +92,10 @@ def process_words(vocab, data):
 
 
 def convert_img(img_id):
-    image = Image.open(os.path.join("dataset", "images", img_id+".png")).convert('RGB')
+    if img_id[0:8] == 'personal':
+        image = Image.open(os.path.join("dataset", "personal", img_id+".png")).convert('RGB')
+    else:
+        image = Image.open(os.path.join("dataset", "images", img_id+".png")).convert('RGB')
     image_numpy = np.array(image.resize((32, 32)))
     #out = torch.ones((32, 32, 3))
     image_numpy = torch.transpose(torch.FloatTensor(image_numpy), 0, 2)
