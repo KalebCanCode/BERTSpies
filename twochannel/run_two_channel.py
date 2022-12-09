@@ -188,7 +188,7 @@ model.to('cuda')
 print('asdfkljaskf')
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()
-history, model = train(model, optimizer, loss, training_loader, val_loader, 10, 'cuda')
+history, model = train(model, optimizer, loss, training_loader, val_loader, 25, 'cuda')
 
 
 def model_inference(model, image_id, question):
