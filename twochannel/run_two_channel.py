@@ -210,6 +210,12 @@ def model_inference(model, image_id, question):
 
 print(model_inference(model, 'image1020', 'how many pillows are there'))
 print(model_inference(model, 'personal-chair', 'what is the plastic bottle on top of'))
+print(model_inference(model, 'personal-couch', 'what is on the couch'))
+print(model_inference(model, 'personal-couch', 'what is on the pillow on top of'))
+print(model_inference(model, 'personal-couch', 'what is in front of the couch'))
+print(model_inference(model, 'personal-couch', 'what is in on the right side of the couch'))
+print(model_inference(model, 'personal-couch', 'how many shoes are there'))
+print(model_inference(model, 'personal-couch', 'how many shoes are in front of the couch'))
 print(model_inference(model, 'image15', 'what is the red object on the wall on the left side of the corridor in the'))
 
 
