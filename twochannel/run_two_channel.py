@@ -95,7 +95,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             label_list = batch['label']
             wups = in_batch_wup_measure(label_list, yhat_list)
             avg_wups.append(wups)
-            break
+            
 
         print("done")
         print(num_train_correct)
@@ -133,7 +133,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             label_list = batch['label']
             vwups = in_batch_wup_measure(label_list, yhat_list)
             val_wups.append(vwups)
-            break
+            
 
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
