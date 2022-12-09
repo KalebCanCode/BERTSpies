@@ -209,7 +209,6 @@ def model_inference(model, image_id, question):
 
 
 print(model_inference(model, 'image1020', 'how many pillows are there'))
-print(model_inference(model, 'personal-hand', 'how many fingers are there'))
 print(model_inference(model, 'personal-chair', 'what is on the chair'))
 print(model_inference(model, 'image15', 'what is the red object on the wall on the left side of the corridor in the'))
 
