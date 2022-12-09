@@ -10,33 +10,33 @@ import numpy as np
 
 
 
-def parse_args(args=None):
-    """ 
-    Perform command-line argument parsing (other otherwise parse arguments with defaults). 
-    To parse in an interative context (i.e. in notebook), add required arguments.
-    These will go into args and will generate a list that can be passed in.
-    For example: 
-        parse_args('--type', 'rnn', ...)
-    """
-    parser = argparse.ArgumentParser(description="Let's Do this Two Channel Thing :D", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--extractor',           required=True,         help='Feature Extractor such as VGG16')
-    parser.add_argument('--task',           required=True,              choices=['train', 'inference'],  help='Task to run')
-    parser.add_argument('--feat_size', required=True,     type=int,                   help='Feature size  of extractor')
-    parser.add_argument('--device',  required=True,    type=str,                   help='Device Using')
-    # parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
-    parser.add_argument('--epochs',         type=int,   default=10,      help='Number of epochs')
-    parser.add_argument('--lstm_units',     type=int, default=512,      help='Hidden Size of lstm')
+# def parse_args(args=None):
+#     """ 
+#     Perform command-line argument parsing (other otherwise parse arguments with defaults). 
+#     To parse in an interative context (i.e. in notebook), add required arguments.
+#     These will go into args and will generate a list that can be passed in.
+#     For example: 
+#         parse_args('--type', 'rnn', ...)
+#     """
+#     parser = argparse.ArgumentParser(description="Let's Do this Two Channel Thing :D", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+#     parser.add_argument('--extractor',           required=True,         help='Feature Extractor such as VGG16')
+#     parser.add_argument('--task',           required=True,              choices=['train', 'inference'],  help='Task to run')
+#     parser.add_argument('--feat_size', required=True,     type=int,                   help='Feature size  of extractor')
+#     parser.add_argument('--device',  required=True,    type=str,                   help='Device Using')
+#     # parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
+#     parser.add_argument('--epochs',         type=int,   default=10,      help='Number of epochs')
+#     parser.add_argument('--lstm_units',     type=int, default=512,      help='Hidden Size of lstm')
     
     
-    # parser.add_argument('--optimizer',      type=str,   default='adam', choices=['adam', 'rmsprop', 'sgd'], help='Model\'s optimizer')
-    # parser.add_argument('--batch_size',     type=int,   default=100,    help='Model\'s batch size.')
-    # parser.add_argument('--hidden_size',    type=int,   default=256,    help='Hidden size used to instantiate the model.')
-    # parser.add_argument('--window_size',    type=int,   default=20,     help='Window size of text entries.')
-    # parser.add_argument('--chkpt_path',     default='',                 help='where the model checkpoint is')
-    # parser.add_argument('--check_valid',    default=True,               action="store_true",  help='if training, also print validation after each epoch')
-    if args is None: 
-        return parser.parse_args()      ## For calling through command line
-    return parser.parse_args(args)
+#     # parser.add_argument('--optimizer',      type=str,   default='adam', choices=['adam', 'rmsprop', 'sgd'], help='Model\'s optimizer')
+#     # parser.add_argument('--batch_size',     type=int,   default=100,    help='Model\'s batch size.')
+#     # parser.add_argument('--hidden_size',    type=int,   default=256,    help='Hidden size used to instantiate the model.')
+#     # parser.add_argument('--window_size',    type=int,   default=20,     help='Window size of text entries.')
+#     # parser.add_argument('--chkpt_path',     default='',                 help='where the model checkpoint is')
+#     # parser.add_argument('--check_valid',    default=True,               action="store_true",  help='if training, also print validation after each epoch')
+#     if args is None: 
+#         return parser.parse_args()      ## For calling through command line
+#     return parser.parse_args(args)
 
 
 def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
@@ -69,7 +69,6 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         for batch in train_loader: 
             #print(batch)
             #print(batch)
-            optimizer.zero_grad()
             #print(batch['q_tensor'][0].size(), batch['image_id'][0].size(), batch['label'])
             q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
             img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
@@ -78,12 +77,14 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             yhat = model((img_feats, q_feats))
             loss = loss_fn(yhat, labels)
 
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             train_loss         += loss.item() 
             #print(torch.max(yhat, 1)[1])
             #print(labels)
+            yhat = torch.log_softmax(yhat, dim=1)
             num_train_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
             num_train_examples += 32
             #print(num_train_correct)
@@ -118,10 +119,12 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
             img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
-            yhat = model((img_feats, q_feats))
-            loss = loss_fn(yhat, labels)
+            with torch.no_grad(): 
+                yhat = model((img_feats, q_feats))
+                loss = loss_fn(yhat, labels)
+                yhat = torch.log_softmax(yhat, dim=1)
 
-            val_loss         += loss.data.item() * q_feats.size(0)
+            val_loss         += loss.item()
             num_val_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
             num_val_examples += 32
 
@@ -188,7 +191,7 @@ model.to('cuda')
 print('asdfkljaskf')
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()
-history, model = train(model, optimizer, loss, training_loader, val_loader, 25, 'cuda')
+history, model = train(model, optimizer, loss, training_loader, val_loader, 10, 'cuda')
 
 
 def model_inference(model, image_id, question):
