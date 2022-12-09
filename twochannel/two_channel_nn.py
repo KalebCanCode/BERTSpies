@@ -66,6 +66,7 @@ class TwoChanNN(nn.Module):
   def forward(self, data):
     image, question = data
     phi = self.pretrained_extractor(image)
+    phi= self.image_dense(phi)
     # question = self.embedding(question)
     # psi, (h, c) = self.lstm_c(question)
     # #print(phi.size())
