@@ -182,4 +182,4 @@ loss = torch.nn.CrossEntropyLoss()
 history = train(model, optimizer, loss, training_loader, val_loader, 1, 'cuda')
 
 
-def inference():
+#def inference():

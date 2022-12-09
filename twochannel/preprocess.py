@@ -92,11 +92,11 @@ def process_words(vocab, data):
 
 
 def convert_img(img_id):
-    image = Image.open(os.path.join("dataset", "images", img_id+".png"))
+    image = Image.open(os.path.join("dataset", "images", img_id+".png")).convert('RBG')
     image_numpy = np.array(image.resize((32, 32)))
-    out = torch.ones((32, 32, 3))
-    out = torch.transpose(out, 0, 2)
-    return torch.transpose(out, 2, 1)
+    #out = torch.ones((32, 32, 3))
+    image_numpy = torch.transpose(image_numpy, 0, 2)
+    return torch.transpose(image_numpy, 2, 1)
 
 word2idx, vocab_size= build_vocab()
 
