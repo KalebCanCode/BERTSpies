@@ -135,7 +135,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
-        val_wups = np.mean(avg_wups)
+        val_wups = np.mean(val_wups)
 
 
         if epoch % 1 ==0:
@@ -197,7 +197,7 @@ def model_inference(model, image_id, question):
     q = process_words(word2idx, question).to("cuda")
 
     output = model((im,q))
-    preds = torch.max(output,1)[1]
+    preds = torch.argmax(output,1)
 
     return answer_space[preds]
 
