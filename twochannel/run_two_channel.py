@@ -204,9 +204,11 @@ def model_inference(model, image_id, question):
 
     #process image
     im = convert_img(img_id=image_id).to('cuda')
+    im1 = torch.unsqueeze(im, dim=0)
     q = process_words(word2idx, question).to("cuda")
+    q1 = torch.unsqueeze(q, dim=0)
 
-    output = model((im,q))
+    output = model((im1,q1))
     preds = torch.argmax(output,1)
 
     return answer_space[preds]
