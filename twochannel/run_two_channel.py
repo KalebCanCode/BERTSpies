@@ -40,7 +40,6 @@ def parse_args(args=None):
 
 
 def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
-    print("hi")
     #summary(model)
     print('train() called: model=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(model).__name__, type(optimizer).__name__,
@@ -66,8 +65,6 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         
 
         # get vocab first 
-        counter = 0
-        print(len(train_loader))
         avg_wups = []
         for batch in train_loader: 
             #print(batch)
@@ -90,8 +87,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             num_train_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
             num_train_examples += 4
             #print(num_train_correct)
-            counter += 1
-            print(counter)
+            
 
             yhat_list = torch.argmax(yhat,1).tolist()
             label_list = batch['label']
@@ -103,10 +99,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         print(num_train_correct)
         train_acc   = num_train_correct / num_train_examples
         train_loss  = train_loss / num_train_examples
-        print(np.shape(avg_wups), '1')
         a = np.concatenate(avg_wups).flatten()
         avg_wups = np.mean(a)
-        print(np.shape(avg_wups), '2')
         
 
         
@@ -118,11 +112,9 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         val_loss       = 0.0
         num_val_correct  = 0
         num_val_examples = 0
-        print("evaluating")
         val_wups = []
 
         for batch in val_loader:
-            print(batch['q_tensor'][0].size(), batch['q_tensor'][1].size())
             q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
             img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
@@ -141,18 +133,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
-        print(np.shape(val_wups), '1')
         v = np.concatenate(val_wups).flatten()
         val_wups = np.mean(v)
-        print(np.shape(val_wups), '2')
-
-        print(train_loss, 'trainl')
-        print(train_acc, 'traina')
-        print(avg_wups, 'avwup')
-        print(val_wups, 'valwp')
-        print(val_loss, 'vallllos')
-        print(val_acc, 'vallacc')
-
 
 
         if epoch % 1 ==0:
@@ -204,7 +186,7 @@ model.to('cuda')
 print('asdfkljaskf')
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()
-history, model = train(model, optimizer, loss, training_loader, val_loader, 1, 'cuda')
+history, model = train(model, optimizer, loss, training_loader, val_loader, 10, 'cuda')
 
 
 def model_inference(model, image_id, question):
