@@ -156,7 +156,7 @@ def collate_fn(list_items):
     return {'q_tensor': q, 'image_id': img, 'label': label}
 #print(len(dataset['test']['q_tensor'][0]), len(dataset['test']['q_tensor'][1]), len(dataset['test']['q_tensor'][2]))
 
-training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, collate_fn = collate_fn)
-val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=True, collate_fn = collate_fn)
+training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=30, shuffle=True, collate_fn = collate_fn)
+val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=30, shuffle=True, collate_fn = collate_fn)
 #for batch_ndx, sample in enumerate(val_loader):
 #        print(len(sample['q_tensor'][0]), len(sample['q_tensor'][1]), len(sample['q_tensor'][2]), len(sample['q_tensor'][3]))

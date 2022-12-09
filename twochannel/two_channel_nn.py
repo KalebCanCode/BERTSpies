@@ -67,7 +67,7 @@ class TwoChanNN(nn.Module):
     image, question = data
     phi = self.pretrained_extractor(image)
     psi = self.language_channel(question)
-    psi, _ = self.lstm_c(psi)
+    # psi, _ = self.lstm_c(psi)
     #print(phi.size())
     #print(psi.size())
     f = self.fuse(phi, psi)
