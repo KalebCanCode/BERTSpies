@@ -2,11 +2,12 @@ from two_channel_nn import TwoChanNN
 import argparse
 import torch
 import time
-from preprocess import training_loader, val_loader, word2idx
+from preprocess import training_loader, val_loader, word2idx, dataset, convert_img, process_words, answer_space
 from torchvision import models
 from torchsummary import summary
 from metrics import in_batch_wup_measure
 import numpy as np
+
 
 
 def parse_args(args=None):
@@ -50,6 +51,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
     history['val_loss'] = []
     history['acc'] = []
     history['val_acc'] = []
+    history['wups'] = []
+    history['val_wups'] = []
 
     start_time_sec = time.time()
 
@@ -140,6 +143,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         history['val_loss'].append(val_loss)
         history['acc'].append(train_acc)
         history['val_acc'].append(val_acc)
+        history['wups'].append(avg_wups)
+        history['wups'].append(val_wups)
 
     # END OF TRAINING LOOP
 
@@ -151,7 +156,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
     print('Time total:     %5.2f sec' % (total_time_sec))
     print('Time per epoch: %5.2f sec' % (time_per_epoch_sec))
 
-    return history
+    return history, model
 
 # def main(args):
 #     model = TwoChanNN(args.extractor, args.lstm_units, args.feat_size, len(word2idx))
@@ -179,7 +184,50 @@ model.to('cuda')
 print('asdfkljaskf')
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()
-history = train(model, optimizer, loss, training_loader, val_loader, 1, 'cuda')
+history, model = train(model, optimizer, loss, training_loader, val_loader, 1, 'cuda')
 
 
-#def inference():
+def model_inference(model, image_id, question):
+
+    #process image
+    im = convert_img(img_id=image_id).to('cuda')
+    q = process_words(word2idx, question).to("cuda")
+
+    output = model((im,q))
+    preds = torch.max(output,1)[1]
+
+    return answer_space[preds]
+
+
+print(model_inference(model, 'image1020', 'how many pillows are there'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # for batch_ndx, sample in enumerate(val_loader):
+    # #sample = collator(dataset['test'][2000:2010])
+    #     img_feat = sample['image_id'].to('cuda')
+    #     text_feat = sample['q_tensor'].to('cuda')
+    #     labels = sample['label'].to('cuda')
+    #     # put in evaluation mode
+    #     model.eval() 
+    #     # forward pass
+    #     output = model((img_feat, text_feat))
+    #     preds = torch.max(output,1)[1]
+
+
+    #     preds = output['logits'].argmax(axis = -1).cpu().numpy() 
+    #     for i in range(2000, 2010):
+    #         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    #         showImage(i)
+    #         print("Prediction:\t", answer_space[preds[i-2000]])
+    #         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
