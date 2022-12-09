@@ -85,13 +85,13 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             train_loss         += loss.data.item() * q_feats.size(0)
             #print(torch.max(yhat, 1)[1])
             #print(labels)
-            num_train_correct  += (torch.argmax(yhat, 1)[1] == labels).sum().item()
+            num_train_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
             num_train_examples += 4
             #print(num_train_correct)
             counter += 1
             print(counter)
 
-            yhat_list = yhat.tolist()
+            yhat_list = torch.argmax(yhat,1).tolist()
             label_list = batch['label']
             wups = in_batch_wup_measure(label_list, yhat_list)
             avg_wups.append(wups)
@@ -125,10 +125,10 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             loss = loss_fn(yhat, labels)
 
             val_loss         += loss.data.item() * q_feats.size(0)
-            num_val_correct  += (torch.argmax(yhat, 1)[1] == labels).sum().item()
+            num_val_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
             num_val_examples += 4
 
-            yhat_list = yhat.tolist()
+            yhat_list = torch.argmax(yhat,1).tolist()
             label_list = batch['label']
             vwups = in_batch_wup_measure(label_list, yhat_list)
             val_wups.append(vwups)

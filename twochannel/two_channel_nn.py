@@ -30,7 +30,7 @@ class TwoChanNN(nn.Module):
         nn.Tanh(),
         nn.Dropout(0.5),
         #1000 or 500 because of dropout??
-        nn.Linear(1000, 1000),
+        nn.Linear(1000, 582),
         # do we need this tanh then softmax??
         nn.Tanh(),
         nn.Softmax()
