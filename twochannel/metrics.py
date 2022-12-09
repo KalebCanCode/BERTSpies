@@ -70,7 +70,9 @@ def batch_wup_measure(labels, preds):
     return np.mean(wup_scores)
 
 def in_batch_wup_measure(labels, preds):
-    wup_scores = [wup_measure(answer_space[label], answer_space[pred]) for label, pred in zip(labels, preds)]
+
+    npanswer_space = np.array(answer_space)
+    wup_scores = [wup_measure(npanswer_space[label], npanswer_space[pred]) for label, pred in zip(labels, preds)]
     return wup_scores
 
 
