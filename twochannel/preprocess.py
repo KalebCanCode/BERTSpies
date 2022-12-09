@@ -95,7 +95,7 @@ def convert_img(img_id):
     image = Image.open(os.path.join("dataset", "images", img_id+".png")).convert('RGB')
     image_numpy = np.array(image.resize((32, 32)))
     #out = torch.ones((32, 32, 3))
-    image_numpy = torch.transpose(torch.tensor(image_numpy), 0, 2)
+    image_numpy = torch.transpose(torch.FloatTensor(image_numpy), 0, 2)
     return torch.transpose(image_numpy, 2, 1)
 
 word2idx, vocab_size= build_vocab()
