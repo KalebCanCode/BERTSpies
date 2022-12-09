@@ -13,12 +13,10 @@ class TwoChanNN(nn.Module):
     self.pretrained_extractor
     self.hidden_units = lstm_units 
     #nn.LSTM(input_size, hidden_size, num_layers)
-    self.lstm_a = nn.Sequential(
-              nn.LSTM(512, 512, 1, batch_first=True),
-              nn.Tanh())
-    self.lstm_b = nn.Sequential(
-              nn.LSTM(512, 512, 1, batch_first=True),
-              nn.Tanh())
+    self.lstm_a = nn.LSTM(512, 512, 1, batch_first=True)
+              
+    self.lstm_b = nn.LSTM(512, 512, 1, batch_first=True)
+     
     #nn.Linear(input_size, output_size)
     self.image_dense = nn.Sequential(
         #pretrained outputs num_ftrs = model_ft.fc.in_features vector
@@ -52,7 +50,7 @@ class TwoChanNN(nn.Module):
     #print("embedding", embeddings.size()) #(4, 25, 512)
     output_a, (final_hidden_a, final_cell_a) = self.lstm_a(embeddings) #(4, 2, 512), (1, 4, 512), (1, 4, 512)
     #print("outputa", output_a.size(), final_hidden_a.size(), final_cell_a.size())
-    output_b, (final_hidden_b, final_cell_b) = self.lstm_b(output_a, (final_hidden_a, final_cell_a))
+    output_b, (final_hidden_b, final_cell_b) = self.lstm_b(nn.Tanh()(output_a), (nn.Tanh()(final_hidden_a), nn.Tanh()(final_cell_a)))
     #not sure about the dim here
     return torch.cat((final_hidden_a[0], final_cell_a[0], final_hidden_b[0], final_cell_b[0]), dim=1)
   
