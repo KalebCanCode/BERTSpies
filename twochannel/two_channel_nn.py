@@ -26,7 +26,7 @@ class TwoChanNN(nn.Module):
         nn.Tanh()
     )
     self.question_dense = nn.Sequential(
-        nn.Linear(2048, 1024),
+        nn.Linear(1024, 1024),
         nn.Tanh()
     )
     self.classifier = nn.Sequential(
