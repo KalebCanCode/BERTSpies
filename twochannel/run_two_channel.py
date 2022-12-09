@@ -81,7 +81,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             loss.backward()
             optimizer.step()
 
-            train_loss         += loss.item()
+            train_loss         += loss.item() * q_feats.size(0)
             #print(torch.max(yhat, 1)[1])
             #print(labels)
             num_train_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
