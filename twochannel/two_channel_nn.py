@@ -11,8 +11,8 @@ class TwoChanNN(nn.Module):
     super().__init__()
     self.vocab_size = vocab_size
     self.pretrained_extractor = image_feature_extractor
-    in_features = self.pretrained_extractor.classifier[-1].in_features
-    self.pretrained_extractor.classifier = nn.Sequential(*list(self.pretrained_extractor.children())[:-1])
+    # in_features = self.pretrained_extractor.classifier[-1].in_features
+    # self.pretrained_extractor.classifier = nn.Sequential(*list(self.pretrained_extractor.children())[:-1])
     self.hidden_units = lstm_units 
     #nn.LSTM(input_size, hidden_size, num_layers)
     self.lstm_a = nn.LSTM(512, 512, 1, batch_first=True)
