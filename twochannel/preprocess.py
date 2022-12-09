@@ -93,7 +93,7 @@ def process_words(vocab, data):
 
 def convert_img(img_id):
     if img_id[0:8] == 'personal':
-        image = Image.open(os.path.join("dataset", "personal", img_id+".png")).convert('RGB')
+        image = Image.open(os.path.join("personal", img_id+".png")).convert('RGB')
     else:
         image = Image.open(os.path.join("dataset", "images", img_id+".png")).convert('RGB')
     image_numpy = np.array(image.resize((32, 32)))
