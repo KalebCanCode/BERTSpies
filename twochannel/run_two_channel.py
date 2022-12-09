@@ -93,7 +93,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
             yhat_list = yhat.tolist()
             label_list = batch['label']
-            wups = in_batch_wup_measure(labels, yhat)
+            wups = in_batch_wup_measure(label_list, yhat_list)
             avg_wups.append(wups)
 
         print("done")
