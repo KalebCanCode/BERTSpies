@@ -101,8 +101,9 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         print(num_train_correct)
         train_acc   = num_train_correct / num_train_examples
         train_loss  = train_loss / num_train_examples
-
+        print(np.shape(avg_wups), '1')
         avg_wups = np.mean(avg_wups)
+        print(np.shape(avg_wups), '2')
         
 
         
@@ -137,7 +138,9 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
+        print(np.shape(val_wups), '1')
         val_wups = np.mean(val_wups)
+        print(np.shape(val_wups), '2')
 
         print(train_loss, 'trainl')
         print(train_acc, 'traina')
