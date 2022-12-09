@@ -13,8 +13,12 @@ class TwoChanNN(nn.Module):
     self.pretrained_extractor
     self.hidden_units = lstm_units 
     #nn.LSTM(input_size, hidden_size, num_layers)
-    self.lstm_a = nn.LSTM(512, 512, 1, batch_first=True)
-    self.lstm_b = nn.LSTM(512, 512, 1, batch_first=True)
+    self.lstm_a = nn.Sequential(
+              nn.LSTM(512, 512, 1, batch_first=True),
+              nn.Tanh())
+    self.lstm_b = nn.Sequential(
+              nn.LSTM(512, 512, 1, batch_first=True),
+              nn.Tanh())
     #nn.Linear(input_size, output_size)
     self.image_dense = nn.Sequential(
         #pretrained outputs num_ftrs = model_ft.fc.in_features vector
@@ -32,6 +36,7 @@ class TwoChanNN(nn.Module):
         #1000 or 500 because of dropout??
         nn.Linear(1000, 582),
         # do we need this tanh then softmax??
+        nn.Tanh(),
 
 
     )
