@@ -68,7 +68,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         # get vocab first 
         counter = 0
         print(len(train_loader))
-        avg_wups_run = []
+        avg_wups = []
         for batch in train_loader: 
             #print(batch)
             #print(batch)
