@@ -63,10 +63,12 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         train_loss         = 0.0
         num_train_correct  = 0
         num_train_examples = 0
+        
+
         # get vocab first 
         counter = 0
         print(len(train_loader))
-        avg_wups = []
+        avg_wups_run = []
         for batch in train_loader: 
             #print(batch)
             #print(batch)
@@ -102,7 +104,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         train_acc   = num_train_correct / num_train_examples
         train_loss  = train_loss / num_train_examples
         print(np.shape(avg_wups), '1')
-        avg_wups = np.mean(avg_wups)
+        a = np.concatenate(avg_wups).flatten()
+        avg_wups = np.mean(a)
         print(np.shape(avg_wups), '2')
         
 
@@ -139,7 +142,8 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
         print(np.shape(val_wups), '1')
-        val_wups = np.mean(val_wups)
+        v = np.concatenate(val_wups).flatten()
+        val_wups = np.mean(v)
         print(np.shape(val_wups), '2')
 
         print(train_loss, 'trainl')
