@@ -5,6 +5,9 @@ import time
 from preprocess import training_loader, val_loader, word2idx
 from torchvision import models
 from torchsummary import summary
+from metrics import in_batch_wup_measure
+import numpy as np
+
 
 def parse_args(args=None):
     """ 
@@ -60,6 +63,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         # get vocab first 
         counter = 0
         print(len(train_loader))
+        avg_wups = []
         for batch in train_loader: 
             #print(batch)
             #print(batch)
@@ -83,10 +87,21 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             #print(num_train_correct)
             counter += 1
             print(counter)
+
+
+            wups = in_batch_wup_measure(labels, yhat)
+            avg_wups.append(wups)
+
         print("done")
         print(num_train_correct)
         train_acc   = num_train_correct / num_train_examples
         train_loss  = train_loss / num_train_examples
+
+        avg_wups = np.mean(avg_wups)
+        
+
+        
+        
 
 
         # --- EVALUATE ON VALIDATION SET -------------------------------------
@@ -95,6 +110,7 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         num_val_correct  = 0
         num_val_examples = 0
         print("evaluating")
+        val_wups = []
 
         for batch in val_loader:
             print(batch['q_tensor'][0].size(), batch['q_tensor'][1].size())
@@ -108,13 +124,17 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             num_val_correct  += (torch.max(yhat, 1)[1] == labels).sum().item()
             num_val_examples += 4
 
+            vwups = in_batch_wup_measure(labels, yhat)
+            val_wups.append(vwups)
+
         val_acc  = num_val_correct / num_val_examples
         val_loss = val_loss / num_val_examples
+        val_wups = np.mean(avg_wups)
 
 
         if epoch % 1 ==0:
-          print('Epoch %3d/%3d, train loss: %5.2f, train acc: %5.2f, val loss: %5.2f, val acc: %5.2f' % \
-                (epoch, epochs, train_loss, train_acc, val_loss, val_acc))
+          print('Epoch %3d/%3d, train loss: %5.2f, train acc: %5.2f, train wups:%5.2f, val wups:%5.2f val loss: %5.2f, val acc: %5.2f' % \
+                (epoch, epochs, train_loss, train_acc, val_loss, val_acc, avg_wups, val_wups))
 
         history['loss'].append(train_loss)
         history['val_loss'].append(val_loss)
@@ -162,3 +182,4 @@ loss = torch.nn.CrossEntropyLoss()
 history = train(model, optimizer, loss, training_loader, val_loader, 1, 'cuda')
 
 
+def inference():
