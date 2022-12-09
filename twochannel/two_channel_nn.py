@@ -22,7 +22,7 @@ class TwoChanNN(nn.Module):
     self.lstm_c = nn.LSTM(2048, 1024, 3, batch_first=True)
 
     self.lstm_d = nn.LSTM(512, 512, 2, batch_first=True)
-    self.lstm_fc = nn.Linear(2048, 1024)
+    self.lstm_fc = nn.Linear(1024, 1024)
      
     #nn.Linear(input_size, output_size)
     self.image_dense = nn.Sequential(
