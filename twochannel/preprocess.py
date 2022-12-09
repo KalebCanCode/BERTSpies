@@ -92,8 +92,8 @@ def process_words(vocab, data):
 
 
 def convert_img(img_id):
-    #image = Image.open(os.path.join("dataset", "images", img_id+".png"))
-    #image_numpy = np.array(image.resize((224, 224)))
+    image = Image.open(os.path.join("dataset", "images", img_id+".png"))
+    image_numpy = np.array(image.resize((32, 32)))
     out = torch.ones((32, 32, 3))
     out = torch.transpose(out, 0, 2)
     return torch.transpose(out, 2, 1)
