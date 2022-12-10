@@ -18,7 +18,6 @@ from transformers import (
 )
 import matplotlib.pyplot as plt
 
-print(torch.backends.mps.is_built())
 ########
 # copied this from kaggle dataset because we are not sure how GPU setup works 
 # SET CACHE FOR HUGGINGFACE TRANSFORMERS + DATASETS
@@ -31,7 +30,6 @@ logging.set_verbosity_error() # ?
 torch.cuda.empty_cache()
 device = torch.device("cuda")
 print(device)
-print("pushing11:13pm")
 ########
 dataset = load_dataset(
     "csv", 
