@@ -26,20 +26,19 @@ def most_freq_ans():
     most_freq = word2freq.most_common(1)[0][0]
     return most_freq, answer_space.index(most_freq)
 
-#print(dataset['test']['label'])
-def create_baseline():
+def create_baseline(data):
     most_freq, idx = most_freq_ans()
     dummy_clf = DummyClassifier(strategy="constant", constant = torch.tensor([idx])) # label is the index of the answer word in answer_space..
     dummy_clf.fit(None, torch.tensor([idx])) 
-    preds = dummy_clf.predict(torch.rand(len(dataset['test']))) # do prediction (will always predict 2) and get wup, accuracy, and f1 score? 
-    labels = torch.tensor(dataset['test']['label'])
+    preds = dummy_clf.predict(torch.rand(len(dataset[data]))) # do prediction (will always predict 2) and get wup, accuracy, and f1 score? 
+    labels = torch.tensor(dataset[data]['label'])
     return {
         "wups": batch_wup_measure(labels, preds),
         "acc": accuracy_score(labels, preds),
         "f1": f1_score(labels, preds, average='macro')
     }
-idk = create_baseline()
-print(idk)
+print("train: ", create_baseline('train'))
+print("test: ", create_baseline('test'))
 
 
 

@@ -56,7 +56,7 @@ def train_model():
     feature_extractor = AutoFeatureExtractor.from_pretrained('google/vit-base-patch16-224-in21k')
     # initialize components 
     collator = MultimodalCollator(text_tokenizer, feature_extractor)
-    model = TransformerModel().to(device) # move model to gpu 
+    model = TransformerModel(is_personal = False).to(device) # move model to gpu 
     trainer = create_trainer(model, dataset['train'], dataset['test'], collator)
     # train 
     train_metrics = trainer.train() 
@@ -66,7 +66,7 @@ def train_model():
     return model, collator, train_metrics, eval_metrics 
 
 def model_inference(model, collator):
-    sample = collator(dataset['test'][2000:2010])
+    sample = collator(dataset['test'][1858:1868])
     img_feat = sample['img_features'].to(device)
     text_feat = sample['text_features'].to(device)
     labels = sample['labels'].to(device)
@@ -75,11 +75,24 @@ def model_inference(model, collator):
     # forward pass
     output = model(img_features = img_feat, text_features = text_feat, labels = labels) 
     preds = output['logits'].argmax(axis = -1).cpu().numpy() 
-    for i in range(2000, 2010):
+    for i in range(1858, 1868):
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         showImage(i)
-        print("Prediction:\t", answer_space[preds[i-2000]])
+        print("Prediction:\t", answer_space[preds[i-1858]])
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+
+def model_personal_inference(model, collator):
+    model.is_personal = True
+    sample = collator({'answer': ['pillow'], 'image_id': ['personal-couch'], 'label': nn.tensor([384]), 'question': ['what is on the couch']})
+    img_feat = sample['img_features'].to(device)
+    text_feat = sample['text_features'].to(device)
+    labels = sample['labels'].to(device)
+    model.eval() 
+    output = model(img_features = img_feat, text_features = text_feat, labels = labels)
+    preds = output['logits'].argmax(axis = -1).cpu().numpy() 
+    print(answer_space[preds[0]])
+    model.is_personal = False # set it back to false
 
 model, collator, train_metrics, eval_metrics = train_model()
 model_inference(model, collator)
+model_personal_inference(model, collator)

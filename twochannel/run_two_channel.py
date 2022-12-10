@@ -207,8 +207,21 @@ def model_inference(model, image_id, question):
 
     return answer_space[preds]
 
+# inference in test set
+print(model_inference(model, 'image278', 'what is left of table'))
+print(model_inference(model, 'image433', 'what is in front of the wall'))
+print(model_inference(model, 'image313', 'what is below the board'))
+print(model_inference(model, 'image210', 'what is behind the sofa'))
+print(model_inference(model, 'image1086', 'how many sofas are there'))
+print(model_inference(model, 'image1317', 'what is found below the window'))
+print(model_inference(model, 'image1315', 'what is to the right of the bookshelf'))
+print(model_inference(model, 'image724', 'what is to right of door'))
+print(model_inference(model, 'image1160', 'what is at the bottom of the photo'))
+print(model_inference(model, 'image1304', 'what is the largest object'))
+print(model_inference(model, 'image629', 'what is to the left of the shelf'))
 
-print(model_inference(model, 'image1020', 'how many pillows are there'))
+
+# inference using our own pictures!
 print(model_inference(model, 'personal-chair', 'what is the plastic bottle on top of'))
 print(model_inference(model, 'personal-couch', 'what is on the couch'))
 print(model_inference(model, 'personal-couch', 'what is on the pillow on top of'))
@@ -216,7 +229,6 @@ print(model_inference(model, 'personal-couch', 'what is in front of the couch'))
 print(model_inference(model, 'personal-couch', 'what is in on the right side of the couch'))
 print(model_inference(model, 'personal-couch', 'how many shoes are there'))
 print(model_inference(model, 'personal-couch', 'how many shoes are in front of the couch'))
-print(model_inference(model, 'image15', 'what is the red object on the wall on the left side of the corridor in the'))
 
 
 

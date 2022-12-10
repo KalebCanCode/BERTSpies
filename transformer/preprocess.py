@@ -54,10 +54,10 @@ dataset = dataset.map(
     batched=True
 )
 
-print(dataset)
-training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=False)
-for batch_ndx, sample in enumerate(training_loader):
-    print(sample)
+#print(dataset)
+#training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=False)
+#for batch_ndx, sample in enumerate(training_loader):
+#    print(sample)
 
 def showImage(id):
     image = Image.open(os.path.join("dataset", "images", dataset['test'][id]['image_id']+".png"))
@@ -70,6 +70,7 @@ def showImage(id):
 class MultimodalCollator:
     tokenizer: AutoTokenizer
     preprocessor: AutoFeatureExtractor
+    is_personal = False
 
     def tokenize_text(self, texts: List[str]):
         encoded_text = self.tokenizer(
@@ -90,7 +91,8 @@ class MultimodalCollator:
 
     def preprocess_images(self, images: List[str]):
         processed_images = self.preprocessor(
-            images=[Image.open(os.path.join("dataset", "images", image_id + ".png")).convert('RGB') for image_id in images],
+            images= [Image.open(os.path.join("personal", image_id+".png")).convert('RGB') for image_id in images] if self.is_personal
+            else [Image.open(os.path.join("dataset", "images", image_id + ".png")).convert('RGB') for image_id in images],
             return_tensors="pt",
         )
         return {
@@ -108,7 +110,7 @@ class MultimodalCollator:
             **self.preprocess_images(
                 raw_batch_dict['image_id']
                 if isinstance(raw_batch_dict, dict) else
-                [i['image_id'] for i in raw_batch_dict]
+                ([i['image_id'] for i in raw_batch_dict])
             ),
             'labels': torch.tensor(
                 raw_batch_dict['label']

@@ -29,7 +29,7 @@ class TransformerModel(nn.Module):
         #for _, param in self.image_encoder.named_parameters():
         #    param.requires_grad = False 
         # fusion layer to combine output from text and image encoding outputs 
-        self.fusion_input_dim = self.text_encoder.config.hidden_size + self.image_encoder.config.hidden_size # may change this later to allow pointwise multiplication 
+        self.fusion_input_dim = self.text_encoder.config.hidden_size + self.image_encoder.config.hidden_size 
         self.fusion_layer = nn.Sequential(
             nn.Linear(self.fusion_input_dim, hidden_dim),
             nn.ReLU(),
