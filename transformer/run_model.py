@@ -110,6 +110,5 @@ def model_personal_inference(model, collator):
     collator.is_personal = False # set it back to false
 
 model, collator, train_metrics, eval_metrics = train_model()
-torch.save(model.state_dict(), "transformer/save")
 model_inference(model, collator)
 model_personal_inference(model, collator)
