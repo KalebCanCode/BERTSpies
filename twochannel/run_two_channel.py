@@ -14,7 +14,7 @@ import numpy as np
 #     """ 
 #     Perform command-line argument parsing (other otherwise parse arguments with defaults). 
 #     To parse in an interative context (i.e. in notebook), add required arguments.
-#     These will go into args and will generate a list that can be passed in.
+#     These will go into args and will generate a list that can be passed in..
 #     For example: 
 #         parse_args('--type', 'rnn', ...)
 #     """
@@ -95,8 +95,6 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             wups = in_batch_wup_measure(label_list, yhat_list)
             avg_wups.append(wups)
             
-
-        print("done")
         print(num_train_correct)
         train_acc   = num_train_correct / num_train_examples
         train_loss  = train_loss / num_train_examples
@@ -188,7 +186,7 @@ for param in model_ft.parameters():
 model_ft.to('cuda')
 model = TwoChanNN(model_ft, 512, 4096, len(word2idx))
 model.to('cuda')
-print('asdfkljaskf')
+
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()
 history, model = train(model, optimizer, loss, training_loader, val_loader, 10, 'cuda')
