@@ -106,7 +106,8 @@ def model_personal_inference(model, collator):
     model.eval() 
     output = model(img_features = img_feat, text_features = text_feat, labels = labels)
     preds = output['logits'].argmax(axis = -1).cpu().numpy() 
-    print(answer_space[preds[i] for i in range(0, 8)])
+    for i in range(0, 8):
+        print(answer_space[preds[i]])
     collator.is_personal = False # set it back to false
 
 #model, collator, train_metrics, eval_metrics = train_model()
