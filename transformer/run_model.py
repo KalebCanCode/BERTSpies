@@ -83,8 +83,23 @@ def model_inference(model, collator):
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 
 def model_personal_inference(model, collator):
-    model.is_personal = True
-    sample = collator({'answer': ['pillow'], 'image_id': ['personal-couch'], 'label': torch.tensor([384]), 'question': ['what is on the couch']})
+    collator.is_personal = True # preprocess using the personal dataset
+    sample = collator({'answer': ['chair', 'pillow', 'sofa', 'shoe', 'gray', '2', '2'], 
+    'image_id': ['personal-chair', 
+    'personal-couch', 
+    'personal-couch', 
+    'personal-couch', 
+    'personal-couch', 
+    'personal-couch', 
+    'personal-couch'], 
+    'label': torch.tensor([107, 384, 453, 438, 251, 11, 11]), 
+    'question': ['what is the plastic bottle on top of',
+    'what is on the sofa',
+    'what is the pillow on top of',
+    'what is in front of the sofa',
+    'what color is the sofa',
+    'how many shoes are there',
+    'how many shoes are in front of the sofa']})
     img_feat = sample['img_features'].to(device)
     text_feat = sample['text_features'].to(device)
     labels = sample['labels'].to(device)
@@ -92,8 +107,9 @@ def model_personal_inference(model, collator):
     output = model(img_features = img_feat, text_features = text_feat, labels = labels)
     preds = output['logits'].argmax(axis = -1).cpu().numpy() 
     print(answer_space[preds[0]])
-    model.is_personal = False # set it back to false
+    collator.is_personal = False # set it back to false
 
 model, collator, train_metrics, eval_metrics = train_model()
+torch.save(model.state_dict(), "transformer/save")
 model_inference(model, collator)
 model_personal_inference(model, collator)

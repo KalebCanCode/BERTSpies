@@ -222,12 +222,12 @@ print(model_inference(model, 'image629', 'what is to the left of the shelf'))
 
 # inference using our own pictures!
 print(model_inference(model, 'personal-chair', 'what is the plastic bottle on top of'))
-print(model_inference(model, 'personal-couch', 'what is on the couch'))
-print(model_inference(model, 'personal-couch', 'what is on the pillow on top of'))
-print(model_inference(model, 'personal-couch', 'what is in front of the couch'))
-print(model_inference(model, 'personal-couch', 'what is in on the right side of the couch'))
+print(model_inference(model, 'personal-couch', 'what is on the sofa'))
+print(model_inference(model, 'personal-couch', 'what is the pillow on top of'))
+print(model_inference(model, 'personal-couch', 'what is in front of the sofa'))
+print(model_inference(model, 'personal-couch', 'what color is the sofa'))
 print(model_inference(model, 'personal-couch', 'how many shoes are there'))
-print(model_inference(model, 'personal-couch', 'how many shoes are in front of the couch'))
+print(model_inference(model, 'personal-couch', 'how many shoes are in front of the sofa'))
 
 
 
