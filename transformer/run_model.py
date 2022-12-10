@@ -56,7 +56,7 @@ def train_model():
     feature_extractor = AutoFeatureExtractor.from_pretrained('google/vit-base-patch16-224-in21k')
     # initialize components 
     collator = MultimodalCollator(text_tokenizer, feature_extractor)
-    model = TransformerModel(is_personal = False).to(device) # move model to gpu 
+    model = TransformerModel().to(device) # move model to gpu 
     trainer = create_trainer(model, dataset['train'], dataset['test'], collator)
     # train 
     train_metrics = trainer.train() 

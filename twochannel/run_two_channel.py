@@ -195,6 +195,7 @@ history, model = train(model, optimizer, loss, training_loader, val_loader, 10, 
 
 
 def model_inference(model, image_id, question):
+    model.eval()
 
     #process image
     im = convert_img(img_id=image_id).to('cuda')
