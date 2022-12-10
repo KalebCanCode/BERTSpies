@@ -117,7 +117,7 @@ def load_model():
     # initialize components 
     collator = MultimodalCollator(text_tokenizer, feature_extractor)
     model = TransformerModel().to(device) # move model to gpu 
-    state_dict = torch.load("/Users/jean/Documents/CS1470/dl-final-project/transformer/transformer-checkpoints/checkpoint-3400")
+    state_dict = torch.load("/Users/jean/Documents/CS1470/dl-final-project/transformer/transformer-checkpoints/checkpoint-3400/pytorch_model.bin")
     model.load_state_dict(state_dict)
     return model, collator
 
