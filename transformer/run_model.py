@@ -109,6 +109,18 @@ def model_personal_inference(model, collator):
     print(answer_space[preds[0]])
     collator.is_personal = False # set it back to false
 
-model, collator, train_metrics, eval_metrics = train_model()
+#model, collator, train_metrics, eval_metrics = train_model()
+def load_model():
+    # initialize tokenizer, feature extractor and pass into multimodal collator 
+    text_tokenizer = AutoTokenizer.from_pretrained('roberta-base')
+    feature_extractor = AutoFeatureExtractor.from_pretrained('google/vit-base-patch16-224-in21k')
+    # initialize components 
+    collator = MultimodalCollator(text_tokenizer, feature_extractor)
+    model = TransformerModel().to(device) # move model to gpu 
+    state_dict = torch.load("/Users/jean/Documents/CS1470/dl-final-project/transformer/transformer-checkpoints/checkpoint-3400")
+    model.load_state_dict(state_dict)
+    return model, collator
+
+model, collator = load_model()
 model_inference(model, collator)
 model_personal_inference(model, collator)
