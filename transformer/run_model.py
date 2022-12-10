@@ -106,7 +106,7 @@ def model_personal_inference(model, collator):
     model.eval() 
     output = model(img_features = img_feat, text_features = text_feat, labels = labels)
     preds = output['logits'].argmax(axis = -1).cpu().numpy() 
-    for i in range(0, 8):
+    for i in range(0, 7):
         print(answer_space[preds[i]])
     collator.is_personal = False # set it back to false
 
