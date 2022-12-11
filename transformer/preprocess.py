@@ -1,18 +1,14 @@
 import os
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 from datasets import load_dataset, set_caching_enabled
 import numpy as np
 from PIL import Image
 import torch
 from transformers import (
-    # Preprocessing / Common
+    # Preprocessing
     AutoTokenizer, AutoFeatureExtractor,
-    # Text & Image Models (Now, image transformers like ViTModel, DeiTModel, BEiT can also be loaded using AutoModel)
-    AutoModel,            
-    # Training / Evaluation
-    TrainingArguments, Trainer,
     # Misc
     logging
 )
@@ -20,17 +16,13 @@ import matplotlib.pyplot as plt
 
 ########
 # copied this from kaggle dataset because we are not sure how GPU setup works 
-# SET CACHE FOR HUGGINGFACE TRANSFORMERS + DATASETS
-#os.environ['HF_HOME'] = os.path.join(".", "cache")
-# SET ONLY 1 GPU DEVICE
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-
-set_caching_enabled(True)
-logging.set_verbosity_error() # ? 
-torch.cuda.empty_cache()
-device = torch.device("cuda")
+set_caching_enabled(True) # cache the dataset
+logging.set_verbosity_error()
+torch.cuda.empty_cache() # empty cache before starting 
+device = torch.device("cuda") # set gpu 
 print(device)
 ########
+# load in dataset 
 dataset = load_dataset(
     "csv", 
     data_files={
@@ -38,39 +30,48 @@ dataset = load_dataset(
         "test": os.path.join("dataset", "data_eval.csv")
     }
 )
-
+# load in list of all possible answers 
 with open(os.path.join("dataset", "answer_space.txt")) as f:
     answer_space = f.read().splitlines()
 
+# map answers to their indices in the answer space list 
 dataset = dataset.map(
     lambda examples: {
         'label': [
-            answer_space.index(ans.replace(" ", "").split(",")[0]) # Select the 1st answer if multiple answers are provided
+            #  Select the 1st answer if multiple answers are provided
+            answer_space.index(ans.replace(" ", "").split(",")[0]) 
             for ans in examples['answer']
         ]
     },
     batched=True
 )
 
-#print(dataset)
-#training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=False)
-#for batch_ndx, sample in enumerate(training_loader):
-#    print(sample)
-
 def showImage(id):
-    image = Image.open(os.path.join("dataset", "images", dataset['test'][id]['image_id']+".png"))
+    '''
+    Function used for displaying the image during inference.
+    '''
+    image = Image.open(os.path.join("dataset", "images", 
+    dataset['test'][id]['image_id']+".png"))
     plt.imshow(image)
     plt.show()
     print("Question:\t", dataset['test'][id]['question'])
     print("Answer:\t\t", dataset['test'][id]['answer'])
 
+
 @dataclass
 class MultimodalCollator:
+    '''
+    Custom class for collating data.  
+    '''
     tokenizer: AutoTokenizer
     preprocessor: AutoFeatureExtractor
-    is_personal = False
+    is_personal = False # flag for whether the image should come from our 
+                        # personal image dataset or not 
 
     def tokenize_text(self, texts: List[str]):
+        '''
+        Defines tokenizer for RoBERTa; returns BPE tokens. 
+        '''
         encoded_text = self.tokenizer(
             text=texts,
             padding='longest',
@@ -81,24 +82,33 @@ class MultimodalCollator:
             return_attention_mask=True,
         )
         return {
-            "text_features": encoded_text
-            #"input_ids": encoded_text['input_ids'].squeeze(),
-            #"token_type_ids": encoded_text['token_type_ids'].squeeze(),
-            #"attention_mask": encoded_text['attention_mask'].squeeze(),
+            "text_features": encoded_text 
         }
 
     def preprocess_images(self, images: List[str]):
+        '''
+        Converts image to RGB and feed them to ViT feature extractor;
+        then returns the extracted/normalized pixel values. 
+        '''
         processed_images = self.preprocessor(
-            images= [Image.open(os.path.join("personal", image_id+".png")).convert('RGB') for image_id in images] if self.is_personal
-            else [Image.open(os.path.join("dataset", "images", image_id + ".png")).convert('RGB') for image_id in images],
+            images= [
+            Image.open(
+            os.path.join("personal", image_id+".png")).convert('RGB') 
+            for image_id in images] if self.is_personal
+            else [
+            Image.open(
+            os.path.join("dataset", "images", image_id + ".png")).convert('RGB') 
+            for image_id in images],
             return_tensors="pt",
         )
         return {
-            #"pixel_values": processed_images['pixel_values'].squeeze(),
-            "img_features": processed_images
+            "img_features": processed_images 
         }
             
     def __call__(self, raw_batch_dict):
+        '''
+        Returns the data in our desired format. 
+        ''' 
         return {
             **self.tokenize_text(
                 raw_batch_dict['question']

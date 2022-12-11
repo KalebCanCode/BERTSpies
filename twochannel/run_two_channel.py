@@ -8,39 +8,10 @@ from torchsummary import summary
 from metrics import in_batch_wup_measure
 import numpy as np
 
-
-
-# def parse_args(args=None):
-#     """ 
-#     Perform command-line argument parsing (other otherwise parse arguments with defaults). 
-#     To parse in an interative context (i.e. in notebook), add required arguments.
-#     These will go into args and will generate a list that can be passed in..
-#     For example: 
-#         parse_args('--type', 'rnn', ...)
-#     """
-#     parser = argparse.ArgumentParser(description="Let's Do this Two Channel Thing :D", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-#     parser.add_argument('--extractor',           required=True,         help='Feature Extractor such as VGG16')
-#     parser.add_argument('--task',           required=True,              choices=['train', 'inference'],  help='Task to run')
-#     parser.add_argument('--feat_size', required=True,     type=int,                   help='Feature size  of extractor')
-#     parser.add_argument('--device',  required=True,    type=str,                   help='Device Using')
-#     # parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
-#     parser.add_argument('--epochs',         type=int,   default=10,      help='Number of epochs')
-#     parser.add_argument('--lstm_units',     type=int, default=512,      help='Hidden Size of lstm')
-    
-    
-#     # parser.add_argument('--optimizer',      type=str,   default='adam', choices=['adam', 'rmsprop', 'sgd'], help='Model\'s optimizer')
-#     # parser.add_argument('--batch_size',     type=int,   default=100,    help='Model\'s batch size.')
-#     # parser.add_argument('--hidden_size',    type=int,   default=256,    help='Hidden size used to instantiate the model.')
-#     # parser.add_argument('--window_size',    type=int,   default=20,     help='Window size of text entries.')
-#     # parser.add_argument('--chkpt_path',     default='',                 help='where the model checkpoint is')
-#     # parser.add_argument('--check_valid',    default=True,               action="store_true",  help='if training, also print validation after each epoch')
-#     if args is None: 
-#         return parser.parse_args()      ## For calling through command line
-#     return parser.parse_args(args)
-
-
 def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
-    #summary(model)
+    '''
+    Runs the training/eval loop. 
+    '''
     print('train() called: model=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(model).__name__, type(optimizer).__name__,
            optimizer.param_groups[0]['lr'], epochs, device))
@@ -62,18 +33,12 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         train_loss         = 0.0
         num_train_correct  = 0
         num_train_examples = 0
-        
-
-        # get vocab first 
         avg_wups = []
         for batch in train_loader: 
-            #print(batch)
-            #print(batch)
-            #print(batch['q_tensor'][0].size(), batch['image_id'][0].size(), batch['label'])
             q_feats    = torch.stack(batch['q_tensor'], axis = 0).to(device)
             img_feats    = torch.stack(batch['image_id'], axis = 0).to(device)
             labels = torch.tensor(batch['label']).to(device)
-            #print(q_feats.size(), img_feats.size(), labels.size())
+
             yhat = model((img_feats, q_feats))
             loss = loss_fn(yhat, labels)
 
@@ -82,14 +47,11 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
             optimizer.step()
 
             train_loss         += loss.item() 
-            #print(torch.max(yhat, 1)[1])
-            #print(labels)
+
             yhat = torch.log_softmax(yhat, dim=1)
             num_train_correct  += (torch.argmax(yhat, 1) == labels).sum().item()
             num_train_examples += 32
-            #print(num_train_correct)
             
-
             yhat_list = torch.argmax(yhat,1).tolist()
             label_list = batch['label']
             wups = in_batch_wup_measure(label_list, yhat_list)
@@ -100,11 +62,6 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
         train_loss  = train_loss / num_train_examples
         a = np.concatenate(avg_wups).flatten()
         avg_wups = np.mean(a)
-        
-
-        
-        
-
 
         # --- EVALUATE ON VALIDATION SET -------------------------------------
         model.eval()
@@ -161,49 +118,38 @@ def train(model, optimizer, loss_fn, train_loader, val_loader, epochs, device):
 
     return history, model
 
-# def main(args):
-#     model = TwoChanNN(args.extractor, args.lstm_units, args.feat_size, len(word2idx))
-#     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
-#     loss = torch.nn.CrossEntropyLoss()
-
-#     # maybe need this?
-#     #training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=4, shuffle=True, num_workers=2)
-#     #validation_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=4, shuffle=False, num_workers=2)
-
-#     if args.task == 'train':
-#         print('train')
-#         #word2idx, vocab_size, train_q, test_q  = process_words()
-#         history = train(model, training_loader, val_loader, args.device)
-#         print(history)
-    
-#     if args.task == 'inference':
-#         return None
+# importing VGG-19 
 import torchvision.models as models
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model_ft = models.vgg19(pretrained=True)   
+model_ft = models.vgg19(pretrained=True)  
+# freeze parameters!  
 for param in model_ft.parameters():
     param.requires_grad = False 
 model_ft.to('cuda')
+# build our two-channel model 
 model = TwoChanNN(model_ft, 512, 4096, len(word2idx))
 model.to('cuda')
-
+# define optimizers 
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 loss = torch.nn.CrossEntropyLoss()
+# train
 history, model = train(model, optimizer, loss, training_loader, val_loader, 10, 'cuda')
 
 
 def model_inference(model, image_id, question):
     model.eval()
-
     #process image
     im = convert_img(img_id=image_id).to('cuda')
+    # reshape to (batch, height, width, channel)
     im1 = torch.unsqueeze(im, dim=0)
+    # same as above but for questions 
     q = process_words(word2idx, question).to("cuda")
     q1 = torch.unsqueeze(q, dim=0)
 
     output = model((im1,q1))
+
     preds = torch.argmax(output,1)
 
+    # convert prediction to answer word/string 
     return answer_space[preds]
 
 # inference in test set
@@ -226,34 +172,3 @@ print(model_inference(model, 'personal-couch', 'what is in front of the sofa'))
 print(model_inference(model, 'personal-couch', 'what color is the sofa'))
 print(model_inference(model, 'personal-couch', 'how many shoes are there'))
 print(model_inference(model, 'personal-couch', 'how many shoes are in front of the sofa'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # for batch_ndx, sample in enumerate(val_loader):
-    # #sample = collator(dataset['test'][2000:2010])
-    #     img_feat = sample['image_id'].to('cuda')
-    #     text_feat = sample['q_tensor'].to('cuda')
-    #     labels = sample['label'].to('cuda')
-    #     # put in evaluation mode
-    #     model.eval() 
-    #     # forward pass
-    #     output = model((img_feat, text_feat))
-    #     preds = torch.max(output,1)[1]
-
-
-    #     preds = output['logits'].argmax(axis = -1).cpu().numpy() 
-    #     for i in range(2000, 2010):
-    #         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    #         showImage(i)
-    #         print("Prediction:\t", answer_space[preds[i-2000]])
-    #         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")

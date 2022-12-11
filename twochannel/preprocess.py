@@ -3,7 +3,7 @@ import numpy as np
 import os 
 from datasets import load_dataset
 from PIL import Image
-
+# load full dataset to build vocab 
 full_dataset = load_dataset(
     "csv", 
     data_files={
@@ -11,7 +11,12 @@ full_dataset = load_dataset(
         "test": os.path.join("dataset", "data_eval.csv")
     }
 )
+
 def get_words(sentences):
+    '''
+    Takes in a list of sentences; for each sentence, splits it up based on 
+    whitespace and returns a list of list of strings/tokens. 
+    '''
     to_return = []
     for sentence in sentences:
         sentence_lst = []
@@ -21,28 +26,48 @@ def get_words(sentences):
     return to_return 
 
 def get_sent(sentence):
+    '''
+    Tokenizes a single sentence. 
+    '''
     to_return = []
     for word in sentence.split():
         to_return.append(word)
     return to_return 
 
 def pad_sentences(sentences, max_length):
+    '''
+    Takes in a list of sentences; pads each sentence to be the max_length
+    word by adding <pad> tokens at the end. 
+    '''
+
     for sentence in sentences:
         sentence += (max_length - len(sentence)) * ['<pad>']
     return sentences
 
 def pad_sentence(sentence, max_length):
+    '''
+    Pads a single sentence. 
+    '''
     sentence += (max_length - len(sentence)) * ['<pad>']
     return sentence
 
 def build_vocab():
+    '''
+    Builds the vocabulary/word-to-index mappings by iterating through 
+    the test and train words, similar to how HW5 (image captioning) built the
+    vocab. 
+    '''
     word2idx = {}
     vocab_size = 0
     # get all question and answers from train and test set using get_words
-    train_questions, train_answers = get_words(full_dataset['train']['question']), get_words(full_dataset['train']['answer'])
-    test_questions, test_answers = get_words(full_dataset['test']['question']), get_words(full_dataset['test']['answer'])
+    train_questions, train_answers = get_words(
+                        full_dataset['train']['question']) \
+                     , get_words(full_dataset['train']['answer'])
+    test_questions, test_answers = get_words(full_dataset['test']['question']) \
+                                , get_words(full_dataset['test']['answer'])
     # pad all of them (not the answers)
-    train_questions, test_questions = pad_sentences(train_questions, 27), pad_sentences(test_questions, 27)
+    train_questions, test_questions = pad_sentences(train_questions, 27) \
+                                    , pad_sentences(test_questions, 27)
 
     for caption in train_questions:
         for index, word in enumerate(caption):
@@ -72,27 +97,38 @@ def build_vocab():
 
     
 def process_words(vocab, data): 
-    '''takes a sentence in a batch and the word2idx (vocab) and converts sentence to a tensor'''
+    '''takes a sentence in a batch and the word2idx (vocab) and converts 
+    sentence to a tensor'''
     questions = get_sent(data)
     questions = pad_sentence(questions, 27)
 
     for index, word in enumerate(questions):
-        questions[index] = vocab[word] # this converts the word string to the index mapping 
+        # this converts the word string to the index mapping 
+        questions[index] = vocab[word] 
     return torch.tensor(questions)
 
 
 
 def convert_img(img_id):
+    '''
+    Takes in an image ID and converts the .png image to a numpy array of 
+    (height, width, RGB channel) dimensions. 
+    '''
     if img_id[0:8] == 'personal':
-        image = Image.open(os.path.join("personal", img_id+".png")).convert('RGB')
+        # if we're taking from the personal image dataset 
+        image = Image.open(
+            os.path.join("personal", img_id+".png")).convert('RGB')
     else:
-        image = Image.open(os.path.join("dataset", "images", img_id+".png")).convert('RGB')
+        # if we're using the DAQUAR dataset 
+        image = Image.open(
+            os.path.join("dataset", "images", img_id+".png")).convert('RGB')
     image_numpy = np.array(image.resize((32, 32)))
     image_numpy = torch.transpose(torch.FloatTensor(image_numpy), 0, 2)
     return torch.transpose(image_numpy, 2, 1)
 
-word2idx, vocab_size= build_vocab()
+word2idx, vocab_size= build_vocab() # build vocab 
 
+# load dataset, split into train/test
 dataset = load_dataset(
     "csv", 
     data_files={
@@ -101,19 +137,24 @@ dataset = load_dataset(
     }
 )
 
+# load list of all possible answers 
 with open(os.path.join("dataset", "answer_space.txt")) as f:
     answer_space = f.read().splitlines()
 
+# map answer words to their indices in the answer space 
 dataset = dataset.map(
     lambda examples: {
         'label': [
-            answer_space.index(ans.replace(" ", "").split(",")[0]) # Select the 1st answer if multiple answers are provided
+            # Select the 1st answer if multiple answers are provided
+            answer_space.index(ans.replace(" ", "").split(",")[0]) 
             for ans in examples['answer']
         ]
     },
     batched=True
 )
 
+# add a new column called q_tensor which represents all of the question
+# sentences tokenized and mapped to their vocab indices 
 dataset = dataset.map(
     lambda examples: {
         'q_tensor': [
@@ -124,6 +165,8 @@ dataset = dataset.map(
     batched=True
 )
 
+# add a new column called i_tensor which represents all of the image ids
+# converted to their tensor representations
 dataset = dataset.map(
     lambda examples: {
         'i_tensor': [
@@ -134,6 +177,8 @@ dataset = dataset.map(
     batched=True
 )
 
+# collating function that will batch the dataset into label, q_tensor, i_tensor
+# format 
 def collate_fn(list_items):
     label = []
     img = []
@@ -144,5 +189,14 @@ def collate_fn(list_items):
         q.append(torch.tensor(d['q_tensor']))
     return {'q_tensor': q, 'image_id': img, 'label': label}
 
-training_loader = torch.utils.data.DataLoader(dataset['train'], batch_size=30, shuffle=True, collate_fn = collate_fn)
-val_loader = torch.utils.data.DataLoader(dataset['test'], batch_size=30, shuffle=True, collate_fn = collate_fn)
+# build dataloaders using our collating function 
+training_loader = torch.utils.data.DataLoader(
+    dataset['train'], 
+    batch_size=30, 
+    shuffle=True, 
+    collate_fn = collate_fn)
+val_loader = torch.utils.data.DataLoader(
+    dataset['test'], 
+    batch_size=30, 
+    shuffle=True, 
+    collate_fn = collate_fn)
